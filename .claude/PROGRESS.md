@@ -651,3 +651,23 @@ python main.py podcast explain 1
 - CAR-002 CV/Resume Manager
 - KNOW-003 Research Tracker
 - LIFE-004 Event Reminder System
+
+## 2026-01-22
+
+**Review Pass: Demo Readiness**
+- Confirmed desktop demo exists (Tkinter Tasks + Audit lens).
+- Confirmed web demo exists (FastAPI API + Vite UI for Tasks/Audit/Goals/Notes).
+- Noted documentation drift: README still lists many features as planned.
+
+**Sprint Identification**
+- Established sprint map in .claude/SPRINTS.md with current focus on demo readiness.
+
+**Next Work (Proposed)**
+- Decide primary demo surface (desktop vs. web) and update runbook accordingly.
+- Update README to align with implemented features and demo entry points.
+- Create a demo launch checklist/runbook (setup, start commands, sample data).
+- Optional polish: web empty-state UX and desktop validation messaging.
+
+**Follow-up Review**
+- Re-checked repo for recent changes; no uncommitted updates found after sprint map entry.
+- Ordered next work to prioritize: demo surface decision → README alignment → demo runbook.
