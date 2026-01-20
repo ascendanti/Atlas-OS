@@ -209,6 +209,192 @@ Recommend that Codex does not write to WORKING_NOTES.md when idle to avoid futur
 
 ---
 
+### [2026-01-20] CLAUDE — Event Spine Invariant Adopted
+**Summary**
+- Adopted architectural invariant: COMMAND → EVENT → PROJECTION → (optional) POLICY
+- Renamed CORE-004 from "Logging System" to "Event Spine + Audit Log"
+- Rescoped LIFE-003 to "Goals-as-projection" (state derived from events only)
+
+**Rationale**
+Order-of-magnitude simplification:
+1. Single canonical truth (events) eliminates data inconsistency bugs
+2. Debugging = querying events chronologically
+3. Audit trail built-in by definition
+4. Testing simplified: test event emission → projections auto-correct
+5. UTF overlay consumes events post-spine stability
+
+**Next Items Re-scoped**
+- CORE-004: events table, emit_event, query_events, explain functions
+- LIFE-003: GOAL_DEFINED/TARGET_SET/UPDATED events, projection computes state
+
+**Docs Updated**
+- ROADMAP.md: Added Event Spine invariant section
+- FEATURES.md: Renamed CORE-004, added acceptance criteria for both features
+
+---
+
+### [2026-01-20] CLAUDE — CORE-004 + LIFE-003 Implementation Complete
+**Summary**
+Implemented Event Spine v0 (CORE-004) and Goals-as-projection (LIFE-003).
+
+**Chunk A: CORE-004 Event Spine v0**
+- Created `modules/core/event_store.py` (185 lines)
+- `events` table: id, event_type, entity_type, entity_id, payload (JSON), timestamp
+- Functions: `emit_event`, `query_events`, `explain`, `count`
+- Wired `TaskTracker.add()` to emit TASK_CREATED event
+- 14 tests in `tests/test_event_store.py`
+
+**Chunk B: LIFE-003 Goals-as-projection v0**
+- Created `modules/life/goal_manager.py` (198 lines)
+- Events: GOAL_DEFINED, GOAL_TARGET_SET, GOAL_UPDATED
+- State derived entirely from events (no direct table mutation)
+- CLI: `life goals define/set-target/update/list/progress/explain`
+- 20 tests in `tests/test_goal_manager.py`
+
+**Invariant Audit**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - GoalManager projects state from events only
+- Entity without event? NO - All goals emit GOAL_DEFINED on creation
+
+**Files Changed**
+- `modules/core/event_store.py` (NEW)
+- `modules/life/goal_manager.py` (NEW)
+- `modules/life/task_tracker.py` (modified - emits TASK_CREATED)
+- `tests/test_event_store.py` (NEW)
+- `tests/test_goal_manager.py` (NEW)
+- `main.py` (modified - added goals CLI)
+- `.claude/ROADMAP.md` (modified)
+- `.claude/FEATURES.md` (modified)
+- `.claude/PROGRESS.md` (modified)
+
+**How to Run**
+```bash
+# Run all tests (111 passing)
+python -m pytest tests/ -v
+
+# CLI examples
+python main.py life goals define "Learn Python"
+python main.py life goals set-target 1 2026-06-01
+python main.py life goals update 1 50
+python main.py life goals progress 1
+python main.py life goals explain 1  # Audit trail
+```
+
+**Follow-ups/Risks**
+- Consider adding TASK_COMPLETED, TASK_UPDATED events to task_tracker
+- Goals projection reconstructs from all events on each query (fine for small scale)
+- No pagination on event queries yet
+
+---
+
+### [2026-01-20] CLAUDE — KNOW-002 Note Manager Complete
+**Summary**
+Implemented Note Manager following Event Spine invariant.
+
+**Implementation**
+- `modules/knowledge/note_manager.py` (198 lines)
+- Events: NOTE_CREATED, NOTE_UPDATED, NOTE_ARCHIVED, NOTE_TAGGED
+- Full-text search on title and content
+- Tag-based organization
+- 27 unit tests (all passing)
+
+**CLI Commands**
+```bash
+python main.py note create "Title" -c "Content" -t "tag1,tag2"
+python main.py note edit 1 --title "New Title"
+python main.py note list --tag python
+python main.py note show 1
+python main.py note search "query"
+python main.py note tag 1 "new,tags"
+python main.py note archive 1
+python main.py note tags
+python main.py note explain 1
+```
+
+**Test Results**
+- 138 tests passing (111 + 27 new)
+
+**Invariant Audit**
+- Parallel mutable truth? NO
+- Events canonical? YES
+- Entity without event? NO
+
+**Next Candidates**
+- KNOW-001 PDF Library Indexer
+- CON-004 Content Idea Bank
+- CAR-001 Publication Tracker
+
+---
+
+### [2026-01-20] CLAUDE — CON-004 Content Idea Bank Complete
+**Summary**
+Implemented Content Idea Bank following Event Spine invariant.
+
+**Implementation**
+- `modules/content/idea_bank.py` (198 lines)
+- Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
+- Platform support: youtube, podcast, blog, social, other
+- Status workflow: draft → planned → in_progress → published → archived
+- 25 unit tests (all passing)
+
+**CLI Commands**
+```bash
+python main.py idea add "Video Title" -d "Description" -p youtube -r 1
+python main.py idea list --platform youtube --status draft
+python main.py idea show 1
+python main.py idea update 1 --title "New Title"
+python main.py idea status 1 planned
+python main.py idea prioritize 1 2
+python main.py idea explain 1
+```
+
+**Test Results**
+- 163 tests passing (138 + 25 new)
+
+**Invariant Audit**
+- Parallel mutable truth? NO
+- Events canonical? YES
+- Entity without event? NO
+
+**Next Candidates**
+- CON-001 YouTube Video Planner
+- CAR-001 Publication Tracker
+- KNOW-001 PDF Library Indexer
+
+---
+
+### [2026-01-20] CLAUDE — UI-001/002/003 Desktop Demo Complete
+**Summary**
+Implemented Tkinter desktop UI proving Event Spine architecture.
+
+**Integration Fix**
+- Added TASK_COMPLETED event emission to task_tracker.complete()
+- Now both TASK_CREATED and TASK_COMPLETED emit to event spine
+
+**Implementation**
+- `modules/ui/app.py` (197 lines)
+- Two tabs: Tasks and Audit
+- Tasks: list/add/complete using TaskTracker functions
+- Audit: lists events from EventStore, shows payload on click
+- Launch: `python main.py ui`
+
+**CLI Commands**
+```bash
+python main.py ui  # Launch desktop UI
+```
+
+**Test Results**
+- 163 tests passing
+
+**Invariant Audit**
+- UI is a lens (no direct SQL) ✓
+- Events are truth ✓
+- Both task events emit ✓
+
+**Next Candidates**
+- Add Habits/Goals tabs
+- Polish UI (empty states, validation)
+- CON-001 YouTube Video Planner
 ### [2026-01-22] CODEX -> CLAUDE (UI Demo Plan + Readiness Audit)
 **Summary**
 - Planned desktop demo lens for Task + Audit vertical slice (no code changes).
