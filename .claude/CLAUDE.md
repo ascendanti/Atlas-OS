@@ -66,3 +66,22 @@ atlas-personal-os/
 3. Build core/database.py for SQLite access
 4. Build core/task_tracker.py as first working module
 5. Create CLI interface (main.py)
+
+## Dual-Agent Coordination
+
+**Coordination File:** `.claude/WORKING_NOTES.md`
+
+**Roles:**
+- **Claude (PM/Steward)**: Owns planning truth (FEATURES.md, PROGRESS.md). Reviews work, updates roadmap, manages .claude/* files. Does not edit application code.
+- **Codex (Builder)**: Implements tasks from FEATURES.md "Next" section. Appends handoffs to WORKING_NOTES.md. Does not edit planning files.
+
+**Single Source of Truth:**
+- Feature status & priorities: FEATURES.md
+- Progress narrative: PROGRESS.md
+- Handoff communication: WORKING_NOTES.md
+
+**Protocol:**
+- No cross-editing of truth files between agents
+- Ambiguity requires "Decision Needed" with options
+- Work in small, shippable increments
+- Append-only handoff log in WORKING_NOTES.md
