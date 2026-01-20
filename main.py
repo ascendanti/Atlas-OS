@@ -1761,6 +1761,191 @@ def pdf_explain(pdf_id):
 
 
 # ============================================================================
+# REMINDER COMMANDS (LIFE-004)
+# ============================================================================
+
+@cli.group()
+def reminder():
+    """Event reminders and calendar events (Event-sourced)"""
+    pass
+
+
+@reminder.command("add")
+@click.argument("title")
+@click.argument("event_date")
+@click.option("--time", "-t", "event_time", default="", help="Event time (HH:MM)")
+@click.option("--description", "-d", default="", help="Event description")
+@click.option("--remind", "-r", type=int, default=30, help="Reminder minutes before")
+@click.option("--recurrence", type=click.Choice(["none", "daily", "weekly", "monthly"]), default="none")
+@click.option("--contact", "-c", type=int, help="Link to contact ID")
+@click.option("--tags", default="", help="Comma-separated tags")
+def reminder_add(title, event_date, event_time, description, remind, recurrence, contact, tags):
+    """Add a new reminder (date format: YYYY-MM-DD)"""
+    from modules.life.event_reminder import EventReminder, Recurrence
+
+    system = EventReminder()
+    reminder_id = system.add(
+        title=title,
+        event_date=event_date,
+        event_time=event_time,
+        description=description,
+        reminder_minutes=remind,
+        recurrence=Recurrence(recurrence),
+        contact_id=contact,
+        tags=tags
+    )
+    click.echo(f"Reminder added with ID: {reminder_id}")
+
+
+@reminder.command("list")
+@click.option("--tag", "-t", default=None, help="Filter by tag")
+@click.option("--from", "-f", "from_date", default=None, help="From date (YYYY-MM-DD)")
+@click.option("--to", "to_date", default=None, help="To date (YYYY-MM-DD)")
+@click.option("--completed", "-c", is_flag=True, help="Include completed")
+@click.option("--archived", "-a", is_flag=True, help="Include archived")
+def reminder_list(tag, from_date, to_date, completed, archived):
+    """List reminders"""
+    from modules.life.event_reminder import EventReminder
+
+    system = EventReminder()
+    reminders = system.list_reminders(
+        tag=tag,
+        from_date=from_date,
+        to_date=to_date,
+        include_completed=completed,
+        include_archived=archived
+    )
+
+    if not reminders:
+        click.echo("No reminders found.")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Date':<12} {'Time':<6} {'Title'}")
+    click.echo("-" * 55)
+
+    for r in reminders:
+        time_str = r['event_time'][:5] if r['event_time'] else "-"
+        title = r['title'][:30] + "..." if len(r['title']) > 30 else r['title']
+        click.echo(f"{r['id']:<4} {r['event_date']:<12} {time_str:<6} {title}")
+
+    click.echo(f"\nTotal: {len(reminders)} reminder(s)")
+
+
+@reminder.command("show")
+@click.argument("reminder_id", type=int)
+def reminder_show(reminder_id):
+    """Show reminder details"""
+    from modules.life.event_reminder import EventReminder
+
+    system = EventReminder()
+    r = system.get(reminder_id)
+
+    if not r:
+        click.echo(f"Reminder {reminder_id} not found.")
+        return
+
+    click.echo(f"\nReminder #{r['id']}")
+    click.echo(f"Title: {r['title']}")
+    click.echo(f"Date: {r['event_date']}")
+    click.echo(f"Time: {r['event_time'] or '-'}")
+    click.echo(f"Description: {r['description'] or '-'}")
+    click.echo(f"Remind: {r['reminder_minutes']} minutes before")
+    click.echo(f"Recurrence: {r['recurrence']}")
+    click.echo(f"Tags: {r['tags'] or '-'}")
+    if r['contact_id']:
+        click.echo(f"Linked Contact: #{r['contact_id']}")
+    click.echo(f"Status: {'COMPLETED' if r['completed'] else 'ARCHIVED' if r['archived'] else 'active'}")
+
+
+@reminder.command("upcoming")
+@click.option("--days", "-d", type=int, default=7, help="Days to look ahead")
+def reminder_upcoming(days):
+    """Show upcoming reminders"""
+    from modules.life.event_reminder import EventReminder
+
+    system = EventReminder()
+    reminders = system.upcoming(days=days)
+
+    if not reminders:
+        click.echo(f"No reminders in the next {days} days.")
+        return
+
+    click.echo(f"\nUpcoming Reminders (next {days} days):")
+    click.echo("-" * 50)
+
+    for r in reminders:
+        time_str = r['event_time'][:5] if r['event_time'] else ""
+        click.echo(f"  {r['event_date']} {time_str} - {r['title']}")
+
+
+@reminder.command("complete")
+@click.argument("reminder_id", type=int)
+def reminder_complete(reminder_id):
+    """Mark reminder as completed"""
+    from modules.life.event_reminder import EventReminder
+
+    system = EventReminder()
+    if system.complete(reminder_id):
+        click.echo(f"Reminder {reminder_id} marked as completed.")
+    else:
+        click.echo(f"Cannot complete reminder {reminder_id}. Check status.")
+
+
+@reminder.command("snooze")
+@click.argument("reminder_id", type=int)
+@click.option("--minutes", "-m", type=int, default=15, help="Minutes to snooze")
+def reminder_snooze(reminder_id, minutes):
+    """Snooze a reminder"""
+    from modules.life.event_reminder import EventReminder
+
+    system = EventReminder()
+    if system.snooze(reminder_id, minutes=minutes):
+        click.echo(f"Reminder {reminder_id} snoozed for {minutes} minutes.")
+    else:
+        click.echo(f"Cannot snooze reminder {reminder_id}. Check status.")
+
+
+@reminder.command("archive")
+@click.argument("reminder_id", type=int)
+def reminder_archive(reminder_id):
+    """Archive a reminder (soft delete)"""
+    from modules.life.event_reminder import EventReminder
+
+    system = EventReminder()
+    if system.archive(reminder_id):
+        click.echo(f"Reminder {reminder_id} archived.")
+    else:
+        click.echo(f"Cannot archive reminder {reminder_id}. Check status.")
+
+
+@reminder.command("explain")
+@click.argument("reminder_id", type=int)
+def reminder_explain(reminder_id):
+    """Show reminder event history (audit trail)"""
+    from modules.life.event_reminder import EventReminder
+    import json
+
+    system = EventReminder()
+    events = system.explain(reminder_id)
+
+    if not events:
+        click.echo(f"No events found for reminder {reminder_id}.")
+        return
+
+    click.echo(f"\nEvent history for reminder #{reminder_id}:")
+    click.echo("-" * 60)
+
+    for event in events:
+        payload = event['payload']
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        click.echo(f"\n[{event['timestamp']}] {event['event_type']}")
+        for k, v in payload.items():
+            if v is not None:
+                click.echo(f"  {k}: {v}")
+
+
+# ============================================================================
 # UI COMMANDS
 # ============================================================================
 

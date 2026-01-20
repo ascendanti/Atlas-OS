@@ -26,9 +26,9 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- CAR-002 CV/Resume Manager
 - KNOW-003 Research Tracker
-- LIFE-004 Event Reminder System
+- CAR-003 Job Application Tracker
+- CON-003 Social Media Calendar
 
 ## Acceptance Criteria
 
@@ -121,9 +121,15 @@
 - Filter by platform and status
 - Unit tests for CRUD + filtering
 - Works 100% offline, <200 lines
-- UI-001 Desktop Demo Shell (Tkinter Lens)
-- UI-002 Tasks Lens (List/Add/Complete)
-- UI-003 Audit Lens (Event Stream + Explain)
+
+### LIFE-004 Event Reminder System (Event-sourced)
+- Events: REMINDER_CREATED, REMINDER_UPDATED, REMINDER_TRIGGERED, REMINDER_SNOOZED, REMINDER_COMPLETED, REMINDER_ARCHIVED
+- Reminder fields: title, description, event_date, event_time, reminder_minutes, recurrence (none/daily/weekly/monthly), contact_id (optional link to contact), tags
+- CLI: `reminder add <title>`, `reminder list`, `reminder show <id>`, `reminder upcoming`, `reminder complete <id>`, `reminder snooze <id>`, `reminder archive <id>`, `reminder explain <id>`
+- Filter by date range and tags
+- Links to contacts (optional) from LIFE-001
+- Unit tests for CRUD + date filtering
+- Works 100% offline, <200 lines
 
 ## In Progress
 - None
@@ -138,6 +144,7 @@
 - LIFE-001 Contact Manager (Rolodex)
 - LIFE-002 Habit Tracker
 - LIFE-003 Goal Manager (Goals-as-projection) ✓ (2026-01-20)
+- LIFE-004 Event Reminder System ✓ (2026-01-20)
 - KNOW-002 Note Manager (Event-sourced) ✓ (2026-01-20)
 - CON-004 Content Idea Bank (Event-sourced) ✓ (2026-01-20)
 - UI-001 Desktop Demo Shell ✓ (2026-01-20)
@@ -147,6 +154,7 @@
 - CAR-001 Publication Tracker ✓ (2026-01-20)
 - KNOW-001 PDF Library Indexer ✓ (2026-01-20)
 - CON-002 Podcast Episode Scheduler ✓ (2026-01-20)
+- CAR-002 CV/Resume Manager ✓ (2026-01-20)
 
 ## Proceed vs Blocked
 - Proceed: UI-001, UI-002, UI-003, UI-004, UI-005, CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
@@ -229,10 +237,10 @@
 
 ## Feature Completion Tracking
 
-**Total Features:** 33
-**Complete:** 19
+**Total Features:** 30
+**Complete:** 22
 **In Progress:** 0
-**Planned:** 14
+**Planned:** 8
 
 **Completed Features:**
 - SPRINT-0000: Dual-agent coordination protocol + WORKING_NOTES.md
@@ -245,6 +253,7 @@
 - LIFE-001: Contact Manager (Rolodex)
 - LIFE-002: Habit Tracker
 - LIFE-003: Goal Manager (Goals-as-projection)
+- LIFE-004: Event Reminder System (Event-sourced)
 - KNOW-002: Note Manager (Event-sourced)
 - CON-004: Content Idea Bank (Event-sourced)
 - UI-001: Desktop Demo Shell
@@ -254,8 +263,9 @@
 - CAR-001: Publication Tracker (Event-sourced)
 - KNOW-001: PDF Library Indexer (Event-sourced)
 - CON-002: Podcast Episode Scheduler (Event-sourced)
+- CAR-002: CV/Resume Manager (Event-sourced)
 
-**Next Sprint:** CAR-002 CV Manager, KNOW-003 Research Tracker, LIFE-004 Event Reminder
+**Next Sprint:** KNOW-003 Research Tracker, CAR-003 Job Application Tracker, CON-003 Social Media Calendar
 
 ## Decision Needed
 - None (event_store confirmed missing; implement CORE-004 before UI-003).
