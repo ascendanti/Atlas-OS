@@ -1067,6 +1067,174 @@ def status():
 
 
 # ============================================================================
+# VIDEO COMMANDS (CON-001)
+# ============================================================================
+
+@cli.group()
+def video():
+    """YouTube video planning (Event-sourced)"""
+    pass
+
+
+@video.command("plan")
+@click.argument("title")
+@click.option("--description", "-d", default="", help="Video description")
+@click.option("--idea", "-i", type=int, help="Link to idea ID")
+@click.option("--duration", "-t", type=int, help="Estimated duration in minutes")
+@click.option("--tags", default="", help="Comma-separated tags")
+def video_plan(title, description, idea, duration, tags):
+    """Plan a new video"""
+    from modules.content.video_planner import VideoPlanner
+
+    planner = VideoPlanner()
+    video_id = planner.plan(
+        title=title,
+        description=description,
+        idea_id=idea,
+        duration_estimate=duration,
+        tags=tags
+    )
+    click.echo(f"Video planned with ID: {video_id}")
+
+
+@video.command("list")
+@click.option("--status", "-s", type=click.Choice(["planned", "scripted", "recorded", "edited", "published"]))
+def video_list(status):
+    """List all videos"""
+    from modules.content.video_planner import VideoPlanner, VideoStatus
+
+    planner = VideoPlanner()
+    status_filter = VideoStatus(status) if status else None
+    videos = planner.list_videos(status=status_filter)
+
+    if not videos:
+        click.echo("No videos found.")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Status':<10} {'Duration':<10} {'Title'}")
+    click.echo("-" * 60)
+
+    for v in videos:
+        duration = f"{v['duration_estimate']}min" if v['duration_estimate'] else "-"
+        title = v['title'][:35] + "..." if len(v['title']) > 35 else v['title']
+        click.echo(f"{v['id']:<4} {v['status']:<10} {duration:<10} {title}")
+
+    click.echo(f"\nTotal: {len(videos)} video(s)")
+
+
+@video.command("show")
+@click.argument("video_id", type=int)
+def video_show(video_id):
+    """Show video details"""
+    from modules.content.video_planner import VideoPlanner
+
+    planner = VideoPlanner()
+    video = planner.get(video_id)
+
+    if not video:
+        click.echo(f"Video {video_id} not found.")
+        return
+
+    click.echo(f"\nVideo #{video['id']}")
+    click.echo(f"Title: {video['title']}")
+    click.echo(f"Status: {video['status']}")
+    click.echo(f"Description: {video['description'] or '-'}")
+    click.echo(f"Duration: {video['duration_estimate'] or '-'} minutes")
+    click.echo(f"Tags: {video['tags'] or '-'}")
+    if video['idea_id']:
+        click.echo(f"Linked Idea: #{video['idea_id']}")
+    if video['script_completed_at']:
+        click.echo(f"Scripted: {video['script_completed_at']}")
+    if video['recorded_at']:
+        click.echo(f"Recorded: {video['recorded_at']}")
+    if video['edited_at']:
+        click.echo(f"Edited: {video['edited_at']}")
+    if video['published_at']:
+        click.echo(f"Published: {video['published_at']}")
+        click.echo(f"URL: {video['publish_url'] or '-'}")
+
+
+@video.command("script")
+@click.argument("video_id", type=int)
+def video_script(video_id):
+    """Mark video script as completed"""
+    from modules.content.video_planner import VideoPlanner
+
+    planner = VideoPlanner()
+    if planner.mark_scripted(video_id):
+        click.echo(f"Video {video_id} marked as scripted.")
+    else:
+        click.echo(f"Cannot mark video {video_id} as scripted. Check status.")
+
+
+@video.command("record")
+@click.argument("video_id", type=int)
+def video_record(video_id):
+    """Mark video as recorded"""
+    from modules.content.video_planner import VideoPlanner
+
+    planner = VideoPlanner()
+    if planner.mark_recorded(video_id):
+        click.echo(f"Video {video_id} marked as recorded.")
+    else:
+        click.echo(f"Cannot mark video {video_id} as recorded. Check status.")
+
+
+@video.command("edit")
+@click.argument("video_id", type=int)
+def video_edit(video_id):
+    """Mark video as edited"""
+    from modules.content.video_planner import VideoPlanner
+
+    planner = VideoPlanner()
+    if planner.mark_edited(video_id):
+        click.echo(f"Video {video_id} marked as edited.")
+    else:
+        click.echo(f"Cannot mark video {video_id} as edited. Check status.")
+
+
+@video.command("publish")
+@click.argument("video_id", type=int)
+@click.option("--url", "-u", default="", help="Published video URL")
+def video_publish(video_id, url):
+    """Mark video as published"""
+    from modules.content.video_planner import VideoPlanner
+
+    planner = VideoPlanner()
+    if planner.mark_published(video_id, url=url):
+        click.echo(f"Video {video_id} marked as published.")
+    else:
+        click.echo(f"Cannot mark video {video_id} as published. Check status.")
+
+
+@video.command("explain")
+@click.argument("video_id", type=int)
+def video_explain(video_id):
+    """Show video event history (audit trail)"""
+    from modules.content.video_planner import VideoPlanner
+    import json
+
+    planner = VideoPlanner()
+    events = planner.explain(video_id)
+
+    if not events:
+        click.echo(f"No events found for video {video_id}.")
+        return
+
+    click.echo(f"\nEvent history for video #{video_id}:")
+    click.echo("-" * 60)
+
+    for event in events:
+        payload = event['payload']
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        click.echo(f"\n[{event['timestamp']}] {event['event_type']}")
+        for k, v in payload.items():
+            if v is not None:
+                click.echo(f"  {k}: {v}")
+
+
+# ============================================================================
 # UI COMMAND
 # ============================================================================
 

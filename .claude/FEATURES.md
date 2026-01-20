@@ -20,9 +20,9 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- CON-001 YouTube Video Planner (Event-sourced, builds on idea_bank)
 - CAR-001 Publication Tracker (Event-sourced)
 - KNOW-001 PDF Library Indexer
+- CON-002 Podcast Episode Scheduler (Event-sourced)
 
 ## Acceptance Criteria
 
@@ -72,6 +72,15 @@
 - Unit tests for CRUD + search
 - Works 100% offline, <200 lines
 
+### CON-001 YouTube Video Planner (Event-sourced)
+- Events: VIDEO_PLANNED, VIDEO_SCRIPTED, VIDEO_RECORDED, VIDEO_EDITED, VIDEO_PUBLISHED
+- Video fields: title, description, idea_id (links to idea_bank), script_status, recording_date, publish_date, duration_estimate, thumbnail_status, tags
+- Status workflow: planned → scripted → recorded → edited → published
+- CLI: `video plan <title>`, `video list`, `video show <id>`, `video script <id>`, `video record <id>`, `video edit <id>`, `video publish <id>`, `video explain <id>`
+- Links to existing ideas from idea_bank (optional)
+- Unit tests for workflow transitions
+- Works 100% offline, <200 lines
+
 ### CON-004 Content Idea Bank (Event-sourced)
 - Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
 - Idea fields: title, description, platform (youtube/podcast/blog/social), status (draft/planned/in_progress/published/archived), priority
@@ -98,6 +107,7 @@
 - UI-001 Desktop Demo Shell ✓ (2026-01-20)
 - UI-002 Tasks Lens ✓ (2026-01-20)
 - UI-003 Audit Lens ✓ (2026-01-20)
+- CON-001 YouTube Video Planner ✓ (2026-01-20)
 
 ## Proceed vs Blocked
 - Proceed: CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
@@ -153,8 +163,8 @@
 
 ## Feature Completion Tracking
 
-**Total Features:** 31
-**Complete:** 15
+**Total Features:** 32
+**Complete:** 16
 **In Progress:** 0
 **Planned:** 16
 
@@ -174,6 +184,7 @@
 - UI-001: Desktop Demo Shell
 - UI-002: Tasks Lens
 - UI-003: Audit Lens
+- CON-001: YouTube Video Planner (Event-sourced)
 
 **Next Sprint:** Content & Knowledge Management
 

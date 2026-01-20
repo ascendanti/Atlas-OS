@@ -422,3 +422,60 @@ python main.py task add "Test task"
 - Add more UI polish (empty states, error handling)
 - Add Habits/Goals tabs as additional lenses
 - Consider cross-platform UI alternatives for distribution
+
+---
+
+## 2026-01-20 (continued)
+
+**CON-001 YouTube Video Planner Implementation**
+
+**Feature:** CON-001 YouTube Video Planner (Event-sourced)
+**Status:** Complete
+
+**Implementation:**
+- ✅ Created `modules/content/video_planner.py` (198 lines)
+- ✅ Events: VIDEO_PLANNED, VIDEO_UPDATED, VIDEO_SCRIPTED, VIDEO_RECORDED, VIDEO_EDITED, VIDEO_PUBLISHED
+- ✅ Status workflow: planned → scripted → recorded → edited → published
+- ✅ Links to idea_bank via idea_id
+- ✅ 21 unit tests in test_video_planner.py (all passing)
+
+**CLI Commands Added:**
+- `video plan <title>` - Plan a new video
+- `video list` - List videos (filter by status)
+- `video show <id>` - Show video details
+- `video script <id>` - Mark script completed
+- `video record <id>` - Mark as recorded
+- `video edit <id>` - Mark as edited
+- `video publish <id>` - Mark as published
+- `video explain <id>` - Audit trail
+
+**Test Results:**
+- 184 tests passing (163 previous + 21 new)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - VideoPlanner projects state from events only
+- Entity without event? NO - All videos emit VIDEO_PLANNED on creation
+
+**How to Run:**
+```bash
+python main.py video plan "Python Tutorial" -t 15 --tags "python,tutorial"
+python main.py video list
+python main.py video script 1
+python main.py video record 1
+python main.py video edit 1
+python main.py video publish 1 --url "https://youtube.com/v/abc"
+python main.py video explain 1
+```
+
+**Files Changed:**
+- `modules/content/video_planner.py` (NEW)
+- `modules/content/__init__.py` (modified)
+- `tests/test_video_planner.py` (NEW)
+- `main.py` (modified - added video CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- CAR-001 Publication Tracker
+- KNOW-001 PDF Library Indexer
+- CON-002 Podcast Episode Scheduler
