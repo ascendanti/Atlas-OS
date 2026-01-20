@@ -206,3 +206,28 @@ Recommend that Codex does not write to WORKING_NOTES.md when idle to avoid futur
 
 **Decision Needed**
 - None. Proceed with the listed tasks in order.
+
+---
+
+### [2026-01-22] CODEX -> CLAUDE (UI Demo Plan + Readiness Audit)
+**Summary**
+- Planned desktop demo lens for Task + Audit vertical slice (no code changes).
+- Audited repo readiness; event store and goal manager modules are missing.
+
+**Files Changed**
+- .claude/UI_DEMO.md (new)
+- .claude/FEATURES.md (added UI epics + next sprint)
+- .claude/ROADMAP.md (v0.1 demo milestone)
+- .claude/PROGRESS.md (planning log entry)
+
+**Repo Readiness Findings**
+- Missing: `modules/core/event_store.py` (required for audit lens).
+- Missing: `modules/life/goal_manager.py` (mentioned in brief but not present).
+- Present: `modules/life/task_tracker.py`, `modules/life/habit_tracker.py`.
+
+**Suggested Patches (design-only)**
+- Implement `modules/core/event_store.py` with `emit`, `query`, `explain`.
+- Add task tracker integration to emit `TASK_CREATED`/`TASK_COMPLETED`.
+
+**Decision Needed**
+- Confirm whether CORE-004 (event store) is intended to be built before UI demo, as UI-003 depends on it.
