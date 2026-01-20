@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Atlas Personal OS</title>
+  <link rel="stylesheet" href="/src/styles.css">
+</head>
+<body class="bg-gray-100 min-h-screen">
+  <div id="app">
+    <!-- Header -->
+    <header class="bg-atlas-dark text-white shadow-lg">
+      <div class="container mx-auto px-4 py-4">
+        <h1 class="text-2xl font-bold">Atlas Personal OS</h1>
+        <p class="text-gray-300 text-sm">Local-first productivity system</p>
+      </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="bg-white border-b shadow-sm">
+      <div class="container mx-auto px-4">
+        <div class="flex space-x-4" id="nav-tabs">
+          <button class="nav-tab active" data-tab="tasks">Tasks</button>
+          <button class="nav-tab" data-tab="audit">Audit</button>
+          <button class="nav-tab" data-tab="goals">Goals</button>
+          <button class="nav-tab" data-tab="notes">Notes</button>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-6">
+      <!-- Tasks Tab -->
+      <section id="tasks-tab" class="tab-content active">
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 class="text-lg font-semibold mb-4">Add Task</h2>
+          <form id="add-task-form" class="flex flex-wrap gap-4">
+            <input type="text" id="task-title" placeholder="Task title"
+                   class="flex-1 min-w-64 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-atlas-primary">
+            <select id="task-priority" class="px-3 py-2 border rounded-lg">
+              <option value="MEDIUM">Medium</option>
+              <option value="LOW">Low</option>
+              <option value="HIGH">High</option>
+              <option value="URGENT">Urgent</option>
+            </select>
+            <input type="text" id="task-category" placeholder="Category"
+                   class="px-3 py-2 border rounded-lg">
+            <button type="submit"
+                    class="px-4 py-2 bg-atlas-primary text-white rounded-lg hover:bg-blue-600 transition">
+              Add Task
+            </button>
+          </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b">
+            <h2 class="text-lg font-semibold">Tasks</h2>
+          </div>
+          <div id="tasks-list" class="divide-y">
+            <div class="p-4 text-gray-500">Loading tasks...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Audit Tab -->
+      <section id="audit-tab" class="tab-content hidden">
+        <div class="bg-white rounded-lg shadow">
+          <div class="p-4 border-b flex justify-between items-center">
+            <h2 class="text-lg font-semibold">Event Log</h2>
+            <button id="refresh-events" class="text-atlas-primary hover:underline">Refresh</button>
+          </div>
+          <div id="events-list" class="divide-y">
+            <div class="p-4 text-gray-500">Loading events...</div>
+          </div>
+        </div>
+        <div class="bg-white rounded-lg shadow mt-6 p-4">
+          <h3 class="font-semibold mb-2">Event Payload</h3>
+          <pre id="event-payload" class="bg-gray-100 p-4 rounded-lg text-sm overflow-auto max-h-48">
+            Select an event to view payload
+          </pre>
+        </div>
+      </section>
+
+      <!-- Goals Tab -->
+      <section id="goals-tab" class="tab-content hidden">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-semibold mb-4">Goals</h2>
+          <div id="goals-list">
+            <div class="text-gray-500">Loading goals...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Notes Tab -->
+      <section id="notes-tab" class="tab-content hidden">
+        <div class="bg-white rounded-lg shadow p-6">
+          <h2 class="text-lg font-semibold mb-4">Notes</h2>
+          <div id="notes-list">
+            <div class="text-gray-500">Loading notes...</div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

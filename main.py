@@ -1761,7 +1761,7 @@ def pdf_explain(pdf_id):
 
 
 # ============================================================================
-# UI COMMAND
+# UI COMMANDS
 # ============================================================================
 
 @cli.command("ui")
@@ -1770,6 +1770,17 @@ def launch_ui():
     from modules.ui.app import launch
     click.echo("Launching Atlas Desktop UI...")
     launch()
+
+
+@cli.command("web")
+@click.option("--host", "-h", default="127.0.0.1", help="API host")
+@click.option("--port", "-p", default=8000, type=int, help="API port")
+def launch_web(host, port):
+    """Launch the Atlas Web API server"""
+    click.echo(f"Starting Atlas Web API on http://{host}:{port}")
+    click.echo("Web UI: Run 'npm run dev' in the web/ directory")
+    from modules.api.server import run_server
+    run_server(host=host, port=port)
 
 
 if __name__ == "__main__":
