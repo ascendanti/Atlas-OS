@@ -141,4 +141,4 @@
 **Next Sprint:** Desktop Demo (Tasks + Audit)
 
 ## Decision Needed
-- Confirm whether `modules/core/event_store.py` exists on the remote branch; UI-003 depends on its API.
+- None (defaulting to Tkinter for demo lens)
