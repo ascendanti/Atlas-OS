@@ -160,6 +160,7 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 - ✅ Updated CLAUDE.md with coordination rules
 - ✅ Established Claude (PM) and Codex (Builder) roles
 - ✅ Defined single source of truth for planning files
+- ✅ Created UTF/ATLAS_UTF_LENS.md (builder's guide for optional UTF layer)
 
 ---
 

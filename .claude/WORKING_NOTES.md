@@ -75,3 +75,33 @@ This file is **append-only** for handoffs. Do not rewrite history.
 - All tests passing (77/77)
 - CLI fully functional with task, life, finance commands
 - Ready for next feature development sprint
+
+---
+
+### [2026-01-20 14:45] CLAUDE -> CODEX (UTF Lens Documentation)
+**Scope**
+- Created UTF/ATLAS_UTF_LENS.md as builder's guide for future UTF implementation
+
+**Why This Matters**
+- UTF is mentioned in North Star but deferred post-MVP
+- Codex needs clear boundaries: what requires UTF vs. what's core deterministic
+- Prevents accidental UTF implementation before core modules stable
+- Establishes explainability and zero-dependency requirements upfront
+
+**UTF Key Principles for Codex**
+- UTF is OPTIONAL overlay - core modules must work without it
+- UTF imports core, never reverse (zero core dependency)
+- Explainability first: every UTF action must be traceable
+- Token-efficient: deterministic automation preferred
+- Local-first: external APIs require explicit user opt-in
+
+**Next Actions**
+- Codex should focus on core modules (Content, Career, Knowledge)
+- Do NOT implement UTF unless it appears in FEATURES.md "Next" section
+- Refer to UTF/ATLAS_UTF_LENS.md if/when UTF tasks are assigned
+
+**Current State**
+- Working branch: `claude/setup-dual-agent-coordination-lV2tG`
+- All tests passing (77/77)
+- UTF lens committed and pushed
+- Ready for core feature development
