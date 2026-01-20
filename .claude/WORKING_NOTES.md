@@ -323,3 +323,40 @@ python main.py note explain 1
 - KNOW-001 PDF Library Indexer
 - CON-004 Content Idea Bank
 - CAR-001 Publication Tracker
+
+---
+
+### [2026-01-20] CLAUDE — CON-004 Content Idea Bank Complete
+**Summary**
+Implemented Content Idea Bank following Event Spine invariant.
+
+**Implementation**
+- `modules/content/idea_bank.py` (198 lines)
+- Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
+- Platform support: youtube, podcast, blog, social, other
+- Status workflow: draft → planned → in_progress → published → archived
+- 25 unit tests (all passing)
+
+**CLI Commands**
+```bash
+python main.py idea add "Video Title" -d "Description" -p youtube -r 1
+python main.py idea list --platform youtube --status draft
+python main.py idea show 1
+python main.py idea update 1 --title "New Title"
+python main.py idea status 1 planned
+python main.py idea prioritize 1 2
+python main.py idea explain 1
+```
+
+**Test Results**
+- 163 tests passing (138 + 25 new)
+
+**Invariant Audit**
+- Parallel mutable truth? NO
+- Events canonical? YES
+- Entity without event? NO
+
+**Next Candidates**
+- CON-001 YouTube Video Planner
+- CAR-001 Publication Tracker
+- KNOW-001 PDF Library Indexer

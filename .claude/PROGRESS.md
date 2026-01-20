@@ -315,3 +315,50 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 - KNOW-001 PDF Library Indexer (depends on note_manager for storage)
 - CON-004 Content Idea Bank (similar pattern)
 - Career features (CAR-001, CAR-002)
+
+---
+
+## 2026-01-20 (continued)
+
+**CON-004 Content Idea Bank Implementation**
+
+**Feature:** CON-004 Content Idea Bank (Event-sourced)
+**Status:** Complete
+
+**Implementation:**
+- ✅ Created `modules/content/__init__.py`
+- ✅ Created `modules/content/idea_bank.py` (198 lines)
+- ✅ Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
+- ✅ Platform support: youtube, podcast, blog, social, other
+- ✅ Status workflow: draft → planned → in_progress → published → archived
+- ✅ Priority levels 1-5 (1=highest)
+- ✅ 25 unit tests in test_idea_bank.py (all passing)
+
+**CLI Commands Added:**
+- `idea add <title>` - Add a new idea
+- `idea list` - List ideas (filter by platform/status)
+- `idea show <id>` - Show idea details
+- `idea update <id>` - Update title/description/platform
+- `idea status <id> <status>` - Change status
+- `idea prioritize <id> <priority>` - Set priority
+- `idea explain <id>` - Audit trail
+
+**Test Results:**
+- 163 tests passing (138 previous + 25 new)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - IdeaBank projects state from events only
+- Entity without event? NO - All ideas emit IDEA_CREATED on creation
+
+**Files Changed:**
+- `modules/content/__init__.py` (NEW)
+- `modules/content/idea_bank.py` (NEW)
+- `tests/test_idea_bank.py` (NEW)
+- `main.py` (modified - added idea CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- CON-001 YouTube Video Planner (builds on idea_bank)
+- CAR-001 Publication Tracker
+- KNOW-001 PDF Library Indexer

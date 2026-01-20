@@ -20,7 +20,7 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- (KNOW-002 completed)
+- CON-004 Content Idea Bank (Event-sourced)
 
 ## Acceptance Criteria
 
@@ -50,6 +50,14 @@
 - Unit tests for CRUD + search
 - Works 100% offline, <200 lines
 
+### CON-004 Content Idea Bank (Event-sourced)
+- Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
+- Idea fields: title, description, platform (youtube/podcast/blog/social), status (draft/planned/in_progress/published/archived), priority
+- CLI: `idea add <title>`, `idea list`, `idea show <id>`, `idea update <id>`, `idea status <id> <status>`, `idea prioritize <id> <priority>`
+- Filter by platform and status
+- Unit tests for CRUD + filtering
+- Works 100% offline, <200 lines
+
 ## In Progress
 - None
 
@@ -64,6 +72,7 @@
 - LIFE-002 Habit Tracker
 - LIFE-003 Goal Manager (Goals-as-projection) ✓ (2026-01-20)
 - KNOW-002 Note Manager (Event-sourced) ✓ (2026-01-20)
+- CON-004 Content Idea Bank (Event-sourced) ✓ (2026-01-20)
 
 ## Proceed vs Blocked
 - Proceed: CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
@@ -120,9 +129,9 @@
 ## Feature Completion Tracking
 
 **Total Features:** 28
-**Complete:** 11
+**Complete:** 12
 **In Progress:** 0
-**Planned:** 18
+**Planned:** 17
 
 **Completed Features:**
 - SPRINT-0000: Dual-agent coordination protocol + WORKING_NOTES.md
@@ -136,6 +145,7 @@
 - LIFE-002: Habit Tracker
 - LIFE-003: Goal Manager (Goals-as-projection)
 - KNOW-002: Note Manager (Event-sourced)
+- CON-004: Content Idea Bank (Event-sourced)
 
 **Next Sprint:** Content & Knowledge Management
 

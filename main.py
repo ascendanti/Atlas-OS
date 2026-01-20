@@ -748,6 +748,164 @@ def note_explain(note_id):
 
 
 # ============================================================================
+# CONTENT COMMANDS
+# ============================================================================
+
+@cli.group()
+def idea():
+    """Content idea management (Event-sourced)"""
+    pass
+
+
+@idea.command("add")
+@click.argument("title")
+@click.option("--description", "-d", default="", help="Idea description")
+@click.option("--platform", "-p", type=click.Choice(["youtube", "podcast", "blog", "social", "other"]), default="other")
+@click.option("--priority", "-r", type=int, default=3, help="Priority 1-5 (1=highest)")
+def idea_add(title, description, platform, priority):
+    """Add a new content idea"""
+    from modules.content.idea_bank import IdeaBank, Platform
+
+    bank = IdeaBank()
+    platform_enum = Platform(platform)
+    idea_id = bank.add(title, description, platform_enum, priority)
+    click.echo(f"Added idea #{idea_id}: {title} [{platform}]")
+
+
+@idea.command("list")
+@click.option("--platform", "-p", type=click.Choice(["youtube", "podcast", "blog", "social", "other"]), default=None)
+@click.option("--status", "-s", type=click.Choice(["draft", "planned", "in_progress", "published", "archived"]), default=None)
+@click.option("--archived", "-a", is_flag=True, help="Include archived ideas")
+def idea_list(platform, status, archived):
+    """List content ideas"""
+    from modules.content.idea_bank import IdeaBank, Platform, IdeaStatus
+
+    bank = IdeaBank()
+    platform_filter = Platform(platform) if platform else None
+    status_filter = IdeaStatus(status) if status else None
+    ideas = bank.list_ideas(platform=platform_filter, status=status_filter, include_archived=archived)
+
+    if not ideas:
+        click.echo("No ideas found. Add one with: idea add <title>")
+        return
+
+    click.echo(f"\n{'ID':<4} {'P':<2} {'Title':<30} {'Platform':<10} {'Status'}")
+    click.echo("-" * 65)
+
+    for i in ideas:
+        title = i['title'][:29] + "..." if len(i['title']) > 29 else i['title']
+        click.echo(f"{i['id']:<4} {i['priority']:<2} {title:<30} {i['platform']:<10} {i['status']}")
+
+    click.echo(f"\nTotal: {len(ideas)} idea(s)")
+
+
+@idea.command("show")
+@click.argument("idea_id", type=int)
+def idea_show(idea_id):
+    """Show idea details"""
+    from modules.content.idea_bank import IdeaBank
+
+    bank = IdeaBank()
+    idea = bank.get(idea_id)
+    if not idea:
+        click.echo(f"Error: Idea #{idea_id} not found")
+        return
+
+    click.echo(f"\nIdea #{idea['id']}: {idea['title']}")
+    click.echo("-" * 50)
+    click.echo(f"Platform: {idea['platform']}")
+    click.echo(f"Status:   {idea['status']}")
+    click.echo(f"Priority: {idea['priority']}")
+    click.echo(f"Created:  {idea['created_at'][:19] if idea['created_at'] else '-'}")
+    if idea['updated_at']:
+        click.echo(f"Updated:  {idea['updated_at'][:19]}")
+    click.echo("")
+    if idea['description']:
+        click.echo(idea['description'])
+    else:
+        click.echo("(no description)")
+
+
+@idea.command("update")
+@click.argument("idea_id", type=int)
+@click.option("--title", "-t", default=None, help="New title")
+@click.option("--description", "-d", default=None, help="New description")
+@click.option("--platform", "-p", type=click.Choice(["youtube", "podcast", "blog", "social", "other"]), default=None)
+def idea_update(idea_id, title, description, platform):
+    """Update an idea's details"""
+    from modules.content.idea_bank import IdeaBank, Platform
+
+    bank = IdeaBank()
+    if title is None and description is None and platform is None:
+        click.echo("Error: Provide --title, --description, or --platform to update")
+        return
+
+    platform_enum = Platform(platform) if platform else None
+    if bank.update(idea_id, title=title, description=description, platform=platform_enum):
+        click.echo(f"Updated idea #{idea_id}")
+    else:
+        click.echo(f"Error: Idea #{idea_id} not found or archived")
+
+
+@idea.command("status")
+@click.argument("idea_id", type=int)
+@click.argument("new_status", type=click.Choice(["draft", "planned", "in_progress", "published", "archived"]))
+def idea_status(idea_id, new_status):
+    """Change an idea's status"""
+    from modules.content.idea_bank import IdeaBank, IdeaStatus
+
+    bank = IdeaBank()
+    status_enum = IdeaStatus(new_status)
+    if bank.set_status(idea_id, status_enum):
+        click.echo(f"Idea #{idea_id} status changed to: {new_status}")
+    else:
+        click.echo(f"Error: Idea #{idea_id} not found")
+
+
+@idea.command("prioritize")
+@click.argument("idea_id", type=int)
+@click.argument("priority", type=int)
+def idea_prioritize(idea_id, priority):
+    """Set an idea's priority (1-5, 1=highest)"""
+    from modules.content.idea_bank import IdeaBank
+
+    bank = IdeaBank()
+    if bank.prioritize(idea_id, priority):
+        click.echo(f"Idea #{idea_id} priority set to: {priority}")
+    else:
+        click.echo(f"Error: Idea #{idea_id} not found or archived")
+
+
+@idea.command("explain")
+@click.argument("idea_id", type=int)
+def idea_explain(idea_id):
+    """Show event history for an idea (audit trail)"""
+    from modules.content.idea_bank import IdeaBank
+
+    bank = IdeaBank()
+    events = bank.explain(idea_id)
+    if not events:
+        click.echo(f"Error: Idea #{idea_id} not found or has no events")
+        return
+
+    click.echo(f"\nEvent History for Idea #{idea_id}:")
+    click.echo("-" * 60)
+
+    for e in events:
+        timestamp = e['timestamp'][:19]
+        event_type = e['event_type']
+        payload = e['payload']
+        # Truncate description if present
+        if 'description' in payload:
+            desc = payload['description']
+            payload['description'] = desc[:40] + "..." if len(desc) > 40 else desc
+        payload_str = ", ".join(f"{k}={v}" for k, v in payload.items())
+        click.echo(f"[{timestamp}] {event_type}")
+        if payload_str:
+            click.echo(f"    {payload_str}")
+
+
+# ============================================================================
 # FINANCE COMMANDS
 # ============================================================================
 
