@@ -174,3 +174,21 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 
 **Blockers:** None / [blocker description]
 ```
+
+## 2026-01-21
+
+**Planning/Review Pass:**
+- Read required .claude docs and inspected repo structure, modules, tests, and README for status alignment.
+- Noted missing UTF/ATLAS_UTF_LENS.md; recorded as a blocker for UTF operational-implications extraction.
+- Added ROADMAP.md and WORKING_NOTES.md; updated FEATURES.md to include Backlog/Next/Done structure with proceed/blocked and decision-needed sections.
+
+**Blockers:**
+- UTF lens file missing; cannot extract operational implications.
+
+## 2026-01-21 (UTF Lens Added)
+
+**Planning/Review Pass:**
+- Added UTF/ATLAS_UTF_LENS.md and mapped operational implications into ROADMAP.
+
+**Blockers:**
+- None
