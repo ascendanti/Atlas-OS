@@ -450,3 +450,29 @@ python main.py ui  # Launch desktop UI
 - .claude/UI_DEMO.md
 - .claude/FEATURES.md
 - .claude/PROGRESS.md
+
+---
+
+### [2026-01-22] CODEX — Review Progress + Sprint Map
+**Review progress**
+- Verified demo entry points: desktop Tkinter UI and web API/UI are present.
+- Identified documentation drift in README (features listed as planned vs. implemented).
+
+**Sprints identified**
+- Added .claude/SPRINTS.md with current sprint: SPRINT-0100 Demo Readiness Review.
+- Planned follow-ups: SPRINT-0101 Web Demo Polish; SPRINT-0102 Desktop Demo Polish.
+
+**Next work (detail)**
+1) Decide primary demo surface (desktop vs. web) and align messaging.
+2) Update README with accurate feature status + demo launch instructions.
+3) Create a concise demo runbook (setup, start commands, sample data seed).
+4) Optional polish:
+   - Web UI: improve empty states + error messaging.
+   - Desktop UI: tighten validation + refresh affordances.
+
+**Decision Needed**
+- Choose the primary demo surface to ship first (Desktop vs. Web).
+
+**Addendum (2026-01-22)**
+- Re-checked repo for recent changes after sprint map update; no uncommitted changes detected.
+- Adapted the plan order: decide demo surface → update README → publish demo runbook.
