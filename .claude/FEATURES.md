@@ -2,6 +2,11 @@
 
 ## Backlog
 - CORE-004 Logging System
+- UI-001 Desktop Demo Shell (Tkinter Lens)
+- UI-002 Tasks Lens (List/Add/Complete)
+- UI-003 Audit Lens (Event Stream + Explain)
+- UI-004 Event Emission Integration (Tasks → Events)
+- UI-005 Keyboard Shortcuts + Empty States
 - FIN-003 Budget Analyzer (Google Sheets)
 - FIN-004 Expense Categorizer
 - FIN-005 Investment Calculator
@@ -21,8 +26,9 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- CORE-004 Logging System
-- LIFE-003 Goal Manager
+- UI-001 Desktop Demo Shell (Tkinter Lens)
+- UI-002 Tasks Lens (List/Add/Complete)
+- UI-003 Audit Lens (Event Stream + Explain)
 
 ## In Progress
 - None
@@ -37,7 +43,7 @@
 - LIFE-002 Habit Tracker
 
 ## Proceed vs Blocked
-- Proceed: CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
+- Proceed: UI-001, UI-002, UI-003, UI-004, UI-005, CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
 - Blocked: None
 
 ## Financial Features
@@ -86,14 +92,41 @@
 | KNOW-003 | Research Tracker | planned | LOW | KNOW-001 |
 | KNOW-004 | Citation Manager | planned | LOW | KNOW-001 |
 
+## UI Features
+
+| ID | Feature | Status | Priority | Dependencies |
+|---|---|---|---|---|
+| UI-001 | Desktop Demo Shell (Tkinter Lens) | planned | HIGH | CORE-001 |
+| UI-002 | Tasks Lens (List/Add/Complete) | planned | HIGH | UI-001 |
+| UI-003 | Audit Lens (Event Stream + Explain) | planned | HIGH | UI-001, UI-004 |
+| UI-004 | Event Emission Integration (Tasks → Events) | planned | HIGH | CORE-004 |
+| UI-005 | Keyboard Shortcuts + Empty States | planned | MEDIUM | UI-001 |
+
+### UI Epic Definitions (DoD + Acceptance)
+- **UI-001 Desktop Demo Shell**: Notebook tabs (Today/Tasks/Habits/Goals/Audit), window boot, no data access yet.
+  - DoD: App launches, tabs visible, exits cleanly.
+  - Acceptance: runs with `python ui/desktop_app.py` (or `atlas_ui.py`).
+- **UI-002 Tasks Lens**: Task list + add + complete wired to TaskTracker API.
+  - DoD: UI calls TaskTracker only (no SQL), updates list after actions.
+  - Acceptance: add/complete reflected in list without restart.
+- **UI-003 Audit Lens**: Event list + filters + per-entity explain.
+  - DoD: UI uses EventStore query/explain only.
+  - Acceptance: Task create/complete events visible with payloads.
+- **UI-004 Event Emission Integration**: TASK_CREATED/TASK_COMPLETED emitted by TaskTracker.
+  - DoD: EventStore receives events on add/complete.
+  - Acceptance: Audit lens shows new events after UI actions.
+- **UI-005 Keyboard + Empty States**: shortcuts for add/complete, empty-state guidance.
+  - DoD: at least 2 shortcuts documented; empty states shown.
+  - Acceptance: no crashes when lists are empty.
+
 ---
 
 ## Feature Completion Tracking
 
-**Total Features:** 28
+**Total Features:** 33
 **Complete:** 8
 **In Progress:** 0
-**Planned:** 21
+**Planned:** 26
 
 **Completed Features:**
 - SPRINT-0000: Dual-agent coordination protocol + WORKING_NOTES.md
@@ -105,7 +138,7 @@
 - LIFE-001: Contact Manager (Rolodex)
 - LIFE-002: Habit Tracker
 
-**Next Sprint:** Content & Knowledge Management
+**Next Sprint:** Desktop Demo (Tasks + Audit)
 
 ## Decision Needed
-- None
+- Confirm whether `modules/core/event_store.py` exists on the remote branch; UI-003 depends on its API.
