@@ -72,7 +72,7 @@
 
 /* List Items */
 .list-item {
-  @apply p-4 hover:bg-gray-750 transition flex items-center justify-between;
+  @apply p-4 transition flex items-center justify-between;
 }
 
 .list-item:hover {
