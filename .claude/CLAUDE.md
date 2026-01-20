@@ -1,6 +1,6 @@
 # Atlas Personal OS - Master Project Memory
 
-**Last Updated:** 2026-01-19
+**Last Updated:** 2026-01-22
 
 ## Project Overview
 
@@ -61,11 +61,9 @@ atlas-personal-os/
 
 ## Next Steps
 
-1. Create FEATURES.md with feature registry
-2. Create MODULES.md with module catalog
-3. Build core/database.py for SQLite access
-4. Build core/task_tracker.py as first working module
-5. Create CLI interface (main.py)
+1. CORE-004 Logging System (structured logs + audit-friendly events)
+2. LIFE-003 Goal Manager (SQLite-backed goals + CLI)
+3. Refresh README/MODULES docs after each feature increment
 
 ## Dual-Agent Coordination
 
