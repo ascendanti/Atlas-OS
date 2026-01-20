@@ -70,12 +70,6 @@ Tabs (Notebook UI):
 4) **UI-004**: emit task events on add/complete (or align with existing event store).
 5) **UI-003**: Audit lens consumes event stream + explain.
 
-## Same-Day Delivery Checklist (Working Demo)
-- **Morning**: implement CORE-004 (event_store) with emit/query/explain and tests.
-- **Midday**: UI-001 shell + UI-002 tasks list/add/complete wired to TaskTracker.
-- **Afternoon**: UI-004 event emission + UI-003 audit tab (event list + filters + explain).
-- **Fallback** (if time constrained): deliver Tasks lens without Audit and note Audit as blocked by CORE-004.
-
 ## Constraints
 - UI is **lens-only** (no new truth stores).
 - Offline-first; uses local SQLite data already in `data/`.

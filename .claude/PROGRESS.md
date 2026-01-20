@@ -214,4 +214,303 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 - Event emission integration remains a dependency for the audit lens.
 
 **Blockers:**
-- Event store module missing; audit lens cannot be wired until CORE-004 is implemented.
+- None noted.
+
+---
+
+## 2026-01-20
+
+**Event Spine Invariant Adoption**
+
+**Architecture Decision:**
+- Adopted COMMAND → EVENT → PROJECTION → (optional) POLICY invariant
+- Events become single canonical truth; projections derive state
+- Simplifies debugging, testing, and audit compliance
+
+**Documentation Updates:**
+- ROADMAP.md: Added Event Spine invariant section
+- FEATURES.md: Renamed CORE-004 to "Event Spine + Audit Log", added acceptance criteria
+- FEATURES.md: Rescoped LIFE-003 to "Goals-as-projection" with event-driven state
+- WORKING_NOTES.md: Appended invariant adoption handoff
+
+**Next Implementation:**
+- Chunk A: CORE-004 Event Spine v0 (events table, emit_event, query_events, explain)
+- Chunk B: LIFE-003 Goals-as-projection (GOAL_DEFINED, GOAL_TARGET_SET, GOAL_UPDATED)
+
+**Blockers:**
+- None
+
+**Implementation Complete:**
+
+**Chunk A: CORE-004 Event Spine v0**
+- ✅ Created `modules/core/event_store.py` (185 lines)
+- ✅ Events table with: id, event_type, entity_type, entity_id, payload (JSON), timestamp
+- ✅ Functions: emit_event, query_events, explain, count
+- ✅ Wired TaskTracker.add() to emit TASK_CREATED event
+- ✅ 14 unit tests in test_event_store.py (all passing)
+
+**Chunk B: LIFE-003 Goals-as-projection v0**
+- ✅ Created `modules/life/goal_manager.py` (198 lines)
+- ✅ Events: GOAL_DEFINED, GOAL_TARGET_SET, GOAL_UPDATED
+- ✅ State derived entirely from events (no direct table mutation)
+- ✅ CLI: `life goals define/set-target/update/list/progress/explain`
+- ✅ 20 unit tests in test_goal_manager.py (all passing)
+
+**Test Results:**
+- 111 tests passing (77 original + 14 event_store + 20 goal_manager)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - GoalManager projects state from events only
+- Entity without event? NO - All goals emit GOAL_DEFINED on creation
+
+**Next Steps:**
+- Add TASK_COMPLETED, TASK_UPDATED events to task_tracker
+- Consider event-sourcing other existing modules
+- Content & Knowledge Management features
+
+---
+
+## 2026-01-20 (continued)
+
+**KNOW-002 Note Manager Implementation**
+
+**Feature:** KNOW-002 Note Manager (Event-sourced)
+**Status:** Complete
+
+**Implementation:**
+- ✅ Created `modules/knowledge/__init__.py`
+- ✅ Created `modules/knowledge/note_manager.py` (198 lines)
+- ✅ Events: NOTE_CREATED, NOTE_UPDATED, NOTE_ARCHIVED, NOTE_TAGGED
+- ✅ Full-text search on title and content
+- ✅ Tag-based organization
+- ✅ 27 unit tests in test_note_manager.py (all passing)
+
+**CLI Commands Added:**
+- `note create <title>` - Create a new note
+- `note edit <id>` - Edit title/content
+- `note list` - List all notes (with tag filter)
+- `note show <id>` - Show note details
+- `note search <query>` - Full-text search
+- `note tag <id> <tags>` - Set tags
+- `note archive <id>` - Soft delete
+- `note tags` - List all unique tags
+- `note explain <id>` - Audit trail
+
+**Test Results:**
+- 138 tests passing (111 previous + 27 new)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - NoteManager projects state from events only
+- Entity without event? NO - All notes emit NOTE_CREATED on creation
+
+**Files Changed:**
+- `modules/knowledge/__init__.py` (NEW)
+- `modules/knowledge/note_manager.py` (NEW)
+- `tests/test_note_manager.py` (NEW)
+- `main.py` (modified - added note CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- KNOW-001 PDF Library Indexer (depends on note_manager for storage)
+- CON-004 Content Idea Bank (similar pattern)
+- Career features (CAR-001, CAR-002)
+
+---
+
+## 2026-01-20 (continued)
+
+**CON-004 Content Idea Bank Implementation**
+
+**Feature:** CON-004 Content Idea Bank (Event-sourced)
+**Status:** Complete
+
+**Implementation:**
+- ✅ Created `modules/content/__init__.py`
+- ✅ Created `modules/content/idea_bank.py` (198 lines)
+- ✅ Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
+- ✅ Platform support: youtube, podcast, blog, social, other
+- ✅ Status workflow: draft → planned → in_progress → published → archived
+- ✅ Priority levels 1-5 (1=highest)
+- ✅ 25 unit tests in test_idea_bank.py (all passing)
+
+**CLI Commands Added:**
+- `idea add <title>` - Add a new idea
+- `idea list` - List ideas (filter by platform/status)
+- `idea show <id>` - Show idea details
+- `idea update <id>` - Update title/description/platform
+- `idea status <id> <status>` - Change status
+- `idea prioritize <id> <priority>` - Set priority
+- `idea explain <id>` - Audit trail
+
+**Test Results:**
+- 163 tests passing (138 previous + 25 new)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - IdeaBank projects state from events only
+- Entity without event? NO - All ideas emit IDEA_CREATED on creation
+
+**Files Changed:**
+- `modules/content/__init__.py` (NEW)
+- `modules/content/idea_bank.py` (NEW)
+- `tests/test_idea_bank.py` (NEW)
+- `main.py` (modified - added idea CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- CON-001 YouTube Video Planner (builds on idea_bank)
+- CAR-001 Publication Tracker
+- KNOW-001 PDF Library Indexer
+
+---
+
+## 2026-01-20 (continued)
+
+**UI-001/002/003 Desktop Demo Implementation**
+
+**Feature:** UI Demo (Tkinter)
+**Status:** Complete
+
+**Integration Fix:**
+- ✅ Added TASK_COMPLETED event emission to `task_tracker.py`
+- Task completion now emits event with title and completed_at timestamp
+
+**Implementation:**
+- ✅ Created `modules/ui/__init__.py`
+- ✅ Created `modules/ui/app.py` (197 lines)
+- ✅ Added `python main.py ui` command
+
+**UI Features:**
+- Two tabs: Tasks and Audit
+- Tasks tab:
+  - Lists tasks from TaskTracker.list()
+  - Add Task form (title, priority, category)
+  - Complete Task button for selected row
+  - Refresh button
+- Audit tab:
+  - Lists recent events from EventStore.query()
+  - Columns: timestamp, event_type, entity_type, entity_id
+  - Click event to show payload JSON in detail pane
+
+**Test Results:**
+- 163 tests passing (unchanged - UI tests deferred)
+
+**Invariant Audit:**
+- UI calls module functions only (no direct SQL) ✓
+- Events are canonical truth ✓
+- Task add/complete emit TASK_CREATED/TASK_COMPLETED ✓
+
+**How to Run:**
+```bash
+# Run the desktop UI
+python main.py ui
+
+# Verify CLI still works
+python main.py task list
+python main.py task add "Test task"
+```
+
+**Files Changed:**
+- `modules/life/task_tracker.py` (modified - emit TASK_COMPLETED)
+- `modules/ui/__init__.py` (NEW)
+- `modules/ui/app.py` (NEW)
+- `main.py` (modified - added ui command)
+- `.claude/FEATURES.md` (modified - added UI acceptance criteria)
+
+**Next Steps:**
+- Add more UI polish (empty states, error handling)
+- Add Habits/Goals tabs as additional lenses
+- Consider cross-platform UI alternatives for distribution
+
+---
+
+## 2026-01-20 (continued)
+
+**CON-001 YouTube Video Planner Implementation**
+
+**Feature:** CON-001 YouTube Video Planner (Event-sourced)
+**Status:** Complete
+
+**Implementation:**
+- ✅ Created `modules/content/video_planner.py` (198 lines)
+- ✅ Events: VIDEO_PLANNED, VIDEO_UPDATED, VIDEO_SCRIPTED, VIDEO_RECORDED, VIDEO_EDITED, VIDEO_PUBLISHED
+- ✅ Status workflow: planned → scripted → recorded → edited → published
+- ✅ Links to idea_bank via idea_id
+- ✅ 21 unit tests in test_video_planner.py (all passing)
+
+**CLI Commands Added:**
+- `video plan <title>` - Plan a new video
+- `video list` - List videos (filter by status)
+- `video show <id>` - Show video details
+- `video script <id>` - Mark script completed
+- `video record <id>` - Mark as recorded
+- `video edit <id>` - Mark as edited
+- `video publish <id>` - Mark as published
+- `video explain <id>` - Audit trail
+
+**Test Results:**
+- 184 tests passing (163 previous + 21 new)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - VideoPlanner projects state from events only
+- Entity without event? NO - All videos emit VIDEO_PLANNED on creation
+
+**How to Run:**
+```bash
+python main.py video plan "Python Tutorial" -t 15 --tags "python,tutorial"
+python main.py video list
+python main.py video script 1
+python main.py video record 1
+python main.py video edit 1
+python main.py video publish 1 --url "https://youtube.com/v/abc"
+python main.py video explain 1
+```
+
+**Files Changed:**
+- `modules/content/video_planner.py` (NEW)
+- `modules/content/__init__.py` (modified)
+- `tests/test_video_planner.py` (NEW)
+- `main.py` (modified - added video CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- CAR-001 Publication Tracker
+- KNOW-001 PDF Library Indexer
+- CON-002 Podcast Episode Scheduler
+## 2026-01-22
+
+**Planning/Review Pass:**
+- Completed UI readiness audit for desktop demo lens.
+- Found missing modules referenced in brief (no `modules/core/event_store.py` and no `modules/life/goal_manager.py` in repo).
+- Drafted UI demo spec with Tasks + Audit vertical slice and lens-only constraints.
+- Updated FEATURES/ROADMAP to include UI demo epics and v0.1 demo milestone.
+
+**Notes:**
+- Task and habit trackers exist; UI should call module APIs only.
+- Event emission integration remains a dependency for audit lens.
+
+**Blockers:**
+- Event store module missing; audit lens cannot be wired without it.
+
+## 2026-01-22 (Follow-up)
+
+**Audit Update:**
+- Re-checked local repo for `modules/core/event_store.py` and `modules/life/goal_manager.py`; both absent in this checkout.
+- Added a note in UI demo planning to align UI lens against actual remote signatures if those files exist on GitHub.
+
+**Blockers:**
+- If event_store exists only on remote, sync is required before implementing the audit lens.
+
+## 2026-01-22 (Iteration)
+
+**Planning Update:**
+- Added an explicit implementation order to the UI demo plan with gating on event store availability.
+- Noted a decision needed: confirm remote `event_store` API before UI-003.
+
+## 2026-01-22 (Event Store Confirmation)
+
+**Planning Update:**
+- Confirmed `modules/core/event_store.py` is missing in repo; UI-003 must wait on CORE-004 implementation.
