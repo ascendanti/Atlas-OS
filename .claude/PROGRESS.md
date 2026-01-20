@@ -155,6 +155,12 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 - Add knowledge management (PDF library)
 - Create web UI (optional)
 
+**Coordination System:**
+- ✅ Created .claude/WORKING_NOTES.md (dual-agent handoff protocol)
+- ✅ Updated CLAUDE.md with coordination rules
+- ✅ Established Claude (PM) and Codex (Builder) roles
+- ✅ Defined single source of truth for planning files
+
 ---
 
 ## Template for Future Entries
