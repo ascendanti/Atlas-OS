@@ -1067,6 +1067,178 @@ def status():
 
 
 # ============================================================================
+# PUBLICATION COMMANDS (CAR-001)
+# ============================================================================
+
+@cli.group()
+def pub():
+    """Publication tracking (Event-sourced)"""
+    pass
+
+
+@pub.command("add")
+@click.argument("title")
+@click.option("--authors", "-a", default="", help="Comma-separated author names")
+@click.option("--venue", "-v", type=click.Choice(["journal", "conference", "preprint", "book", "other"]), default="other")
+@click.option("--abstract", default="", help="Publication abstract")
+@click.option("--tags", "-t", default="", help="Comma-separated tags")
+def pub_add(title, authors, venue, abstract, tags):
+    """Add a new publication"""
+    from modules.career.publication_tracker import PublicationTracker, VenueType
+
+    tracker = PublicationTracker()
+    pub_id = tracker.add(
+        title=title,
+        authors=authors,
+        venue=VenueType(venue),
+        abstract=abstract,
+        tags=tags
+    )
+    click.echo(f"Publication added with ID: {pub_id}")
+
+
+@pub.command("list")
+@click.option("--status", "-s", type=click.Choice(["draft", "submitted", "accepted", "rejected", "published"]))
+@click.option("--venue", "-v", type=click.Choice(["journal", "conference", "preprint", "book", "other"]))
+def pub_list(status, venue):
+    """List all publications"""
+    from modules.career.publication_tracker import PublicationTracker, PubStatus, VenueType
+
+    tracker = PublicationTracker()
+    status_filter = PubStatus(status) if status else None
+    venue_filter = VenueType(venue) if venue else None
+    pubs = tracker.list_publications(status=status_filter, venue=venue_filter)
+
+    if not pubs:
+        click.echo("No publications found.")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Status':<10} {'Venue':<12} {'Title'}")
+    click.echo("-" * 70)
+
+    for p in pubs:
+        title = p['title'][:40] + "..." if len(p['title']) > 40 else p['title']
+        click.echo(f"{p['id']:<4} {p['status']:<10} {p['venue']:<12} {title}")
+
+    click.echo(f"\nTotal: {len(pubs)} publication(s)")
+
+
+@pub.command("show")
+@click.argument("pub_id", type=int)
+def pub_show(pub_id):
+    """Show publication details"""
+    from modules.career.publication_tracker import PublicationTracker
+
+    tracker = PublicationTracker()
+    pub = tracker.get(pub_id)
+
+    if not pub:
+        click.echo(f"Publication {pub_id} not found.")
+        return
+
+    click.echo(f"\nPublication #{pub['id']}")
+    click.echo(f"Title: {pub['title']}")
+    click.echo(f"Authors: {pub['authors'] or '-'}")
+    click.echo(f"Venue: {pub['venue']}")
+    click.echo(f"Status: {pub['status']}")
+    click.echo(f"Abstract: {pub['abstract'][:100] + '...' if len(pub['abstract']) > 100 else pub['abstract'] or '-'}")
+    click.echo(f"Tags: {pub['tags'] or '-'}")
+    if pub['submission_date']:
+        click.echo(f"Submitted: {pub['submission_date']}")
+    if pub['acceptance_date']:
+        click.echo(f"Accepted: {pub['acceptance_date']}")
+    if pub['rejection_date']:
+        click.echo(f"Rejected: {pub['rejection_date']}")
+    if pub['publication_date']:
+        click.echo(f"Published: {pub['publication_date']}")
+    if pub['doi']:
+        click.echo(f"DOI: {pub['doi']}")
+    if pub['url']:
+        click.echo(f"URL: {pub['url']}")
+
+
+@pub.command("submit")
+@click.argument("pub_id", type=int)
+def pub_submit(pub_id):
+    """Mark publication as submitted"""
+    from modules.career.publication_tracker import PublicationTracker
+
+    tracker = PublicationTracker()
+    if tracker.submit(pub_id):
+        click.echo(f"Publication {pub_id} marked as submitted.")
+    else:
+        click.echo(f"Cannot submit publication {pub_id}. Check status (must be draft).")
+
+
+@pub.command("accept")
+@click.argument("pub_id", type=int)
+def pub_accept(pub_id):
+    """Mark publication as accepted"""
+    from modules.career.publication_tracker import PublicationTracker
+
+    tracker = PublicationTracker()
+    if tracker.accept(pub_id):
+        click.echo(f"Publication {pub_id} marked as accepted.")
+    else:
+        click.echo(f"Cannot accept publication {pub_id}. Check status (must be submitted).")
+
+
+@pub.command("reject")
+@click.argument("pub_id", type=int)
+def pub_reject(pub_id):
+    """Mark publication as rejected"""
+    from modules.career.publication_tracker import PublicationTracker
+
+    tracker = PublicationTracker()
+    if tracker.reject(pub_id):
+        click.echo(f"Publication {pub_id} marked as rejected.")
+    else:
+        click.echo(f"Cannot reject publication {pub_id}. Check status (must be submitted).")
+
+
+@pub.command("publish")
+@click.argument("pub_id", type=int)
+@click.option("--doi", "-d", default="", help="DOI identifier")
+@click.option("--url", "-u", default="", help="Publication URL")
+def pub_publish(pub_id, doi, url):
+    """Mark publication as published"""
+    from modules.career.publication_tracker import PublicationTracker
+
+    tracker = PublicationTracker()
+    if tracker.publish(pub_id, doi=doi, url=url):
+        click.echo(f"Publication {pub_id} marked as published.")
+    else:
+        click.echo(f"Cannot publish publication {pub_id}. Check status (must be accepted).")
+
+
+@pub.command("explain")
+@click.argument("pub_id", type=int)
+def pub_explain(pub_id):
+    """Show publication event history (audit trail)"""
+    from modules.career.publication_tracker import PublicationTracker
+    import json
+
+    tracker = PublicationTracker()
+    events = tracker.explain(pub_id)
+
+    if not events:
+        click.echo(f"No events found for publication {pub_id}.")
+        return
+
+    click.echo(f"\nEvent history for publication #{pub_id}:")
+    click.echo("-" * 60)
+
+    for event in events:
+        payload = event['payload']
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        click.echo(f"\n[{event['timestamp']}] {event['event_type']}")
+        for k, v in payload.items():
+            if v:
+                click.echo(f"  {k}: {v}")
+
+
+# ============================================================================
 # VIDEO COMMANDS (CON-001)
 # ============================================================================
 

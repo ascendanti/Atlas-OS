@@ -26,9 +26,9 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- CAR-001 Publication Tracker (Event-sourced)
 - KNOW-001 PDF Library Indexer
 - CON-002 Podcast Episode Scheduler (Event-sourced)
+- CAR-002 CV/Resume Manager
 
 ## Acceptance Criteria
 
@@ -87,6 +87,15 @@
 - Unit tests for workflow transitions
 - Works 100% offline, <200 lines
 
+### CAR-001 Publication Tracker (Event-sourced)
+- Events: PUB_CREATED, PUB_UPDATED, PUB_SUBMITTED, PUB_ACCEPTED, PUB_REJECTED, PUB_PUBLISHED
+- Publication fields: title, authors, venue (journal/conference/preprint), status, submission_date, publication_date, doi, url, abstract, tags
+- Status workflow: draft → submitted → (accepted|rejected) → published
+- CLI: `pub add <title>`, `pub list`, `pub show <id>`, `pub submit <id>`, `pub accept <id>`, `pub reject <id>`, `pub publish <id>`, `pub explain <id>`
+- Filter by venue type and status
+- Unit tests for workflow transitions
+- Works 100% offline, <200 lines
+
 ### CON-004 Content Idea Bank (Event-sourced)
 - Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
 - Idea fields: title, description, platform (youtube/podcast/blog/social), status (draft/planned/in_progress/published/archived), priority
@@ -117,6 +126,7 @@
 - UI-002 Tasks Lens ✓ (2026-01-20)
 - UI-003 Audit Lens ✓ (2026-01-20)
 - CON-001 YouTube Video Planner ✓ (2026-01-20)
+- CAR-001 Publication Tracker ✓ (2026-01-20)
 
 ## Proceed vs Blocked
 - Proceed: UI-001, UI-002, UI-003, UI-004, UI-005, CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
@@ -199,8 +209,8 @@
 
 ## Feature Completion Tracking
 
-**Total Features:** 32
-**Complete:** 16
+**Total Features:** 33
+**Complete:** 17
 **In Progress:** 0
 **Planned:** 16
 **Total Features:** 33
@@ -225,6 +235,7 @@
 - UI-002: Tasks Lens
 - UI-003: Audit Lens
 - CON-001: YouTube Video Planner (Event-sourced)
+- CAR-001: Publication Tracker (Event-sourced)
 
 **Next Sprint:** Desktop Demo (Tasks + Audit)
 

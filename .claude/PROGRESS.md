@@ -479,37 +479,60 @@ python main.py video explain 1
 - CAR-001 Publication Tracker
 - KNOW-001 PDF Library Indexer
 - CON-002 Podcast Episode Scheduler
-## 2026-01-22
 
-**Planning/Review Pass:**
-- Completed UI readiness audit for desktop demo lens.
-- Found missing modules referenced in brief (no `modules/core/event_store.py` and no `modules/life/goal_manager.py` in repo).
-- Drafted UI demo spec with Tasks + Audit vertical slice and lens-only constraints.
-- Updated FEATURES/ROADMAP to include UI demo epics and v0.1 demo milestone.
+---
 
-**Notes:**
-- Task and habit trackers exist; UI should call module APIs only.
-- Event emission integration remains a dependency for audit lens.
+## 2026-01-20 (continued)
 
-**Blockers:**
-- Event store module missing; audit lens cannot be wired without it.
+**CAR-001 Publication Tracker Implementation**
 
-## 2026-01-22 (Follow-up)
+**Feature:** CAR-001 Publication Tracker (Event-sourced)
+**Status:** Complete
 
-**Audit Update:**
-- Re-checked local repo for `modules/core/event_store.py` and `modules/life/goal_manager.py`; both absent in this checkout.
-- Added a note in UI demo planning to align UI lens against actual remote signatures if those files exist on GitHub.
+**Implementation:**
+- ✅ Created `modules/career/__init__.py`
+- ✅ Created `modules/career/publication_tracker.py` (198 lines)
+- ✅ Events: PUB_CREATED, PUB_UPDATED, PUB_SUBMITTED, PUB_ACCEPTED, PUB_REJECTED, PUB_PUBLISHED
+- ✅ Status workflow: draft → submitted → (accepted|rejected) → published
+- ✅ Venue types: journal, conference, preprint, book, other
+- ✅ 23 unit tests in test_publication_tracker.py (all passing)
 
-**Blockers:**
-- If event_store exists only on remote, sync is required before implementing the audit lens.
+**CLI Commands Added:**
+- `pub add <title>` - Add a new publication
+- `pub list` - List publications (filter by status/venue)
+- `pub show <id>` - Show publication details
+- `pub submit <id>` - Mark as submitted
+- `pub accept <id>` - Mark as accepted
+- `pub reject <id>` - Mark as rejected
+- `pub publish <id>` - Mark as published
+- `pub explain <id>` - Audit trail
 
-## 2026-01-22 (Iteration)
+**Test Results:**
+- 207 tests passing (184 previous + 23 new)
 
-**Planning Update:**
-- Added an explicit implementation order to the UI demo plan with gating on event store availability.
-- Noted a decision needed: confirm remote `event_store` API before UI-003.
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - PublicationTracker projects state from events only
+- Entity without event? NO - All publications emit PUB_CREATED on creation
 
-## 2026-01-22 (Event Store Confirmation)
+**How to Run:**
+```bash
+python main.py pub add "My Research Paper" -a "Smith, J." -v journal
+python main.py pub list
+python main.py pub submit 1
+python main.py pub accept 1
+python main.py pub publish 1 --doi "10.1234/paper"
+python main.py pub explain 1
+```
 
-**Planning Update:**
-- Confirmed `modules/core/event_store.py` is missing in repo; UI-003 must wait on CORE-004 implementation.
+**Files Changed:**
+- `modules/career/__init__.py` (NEW)
+- `modules/career/publication_tracker.py` (NEW)
+- `tests/test_publication_tracker.py` (NEW)
+- `main.py` (modified - added pub CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- KNOW-001 PDF Library Indexer
+- CON-002 Podcast Episode Scheduler
+- CAR-002 CV/Resume Manager
