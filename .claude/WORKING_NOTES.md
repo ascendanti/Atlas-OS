@@ -231,13 +231,3 @@ Recommend that Codex does not write to WORKING_NOTES.md when idle to avoid futur
 
 **Decision Needed**
 - Confirm whether CORE-004 (event store) is intended to be built before UI demo, as UI-003 depends on it.
-
----
-
-### [2026-01-22] CODEX -> CLAUDE (Repo Discrepancy Check)
-**Summary**
-- Verified local repo does NOT contain `modules/core/event_store.py` or `modules/life/goal_manager.py`.
-- Updated UI demo plan with a repo audit note to align UI lens to remote signatures if they exist.
-
-**Decision Needed**
-- Confirm whether the remote (GitHub) branch includes `event_store.py` and `goal_manager.py`; if yes, update local checkout and adjust UI plan accordingly.

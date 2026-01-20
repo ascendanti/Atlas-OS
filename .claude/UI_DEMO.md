@@ -48,10 +48,6 @@ Tabs (Notebook UI):
 - `modules.core.event_store.EventStore.query(...)`
 - `modules.core.event_store.EventStore.explain(entity_type, entity_id)`
 
-**Repository audit note:**
-- Local checkout does not currently include `modules/core/event_store.py` or `modules/life/goal_manager.py`.
-- If these exist on remote, align the UI lens to their actual function signatures; otherwise implement CORE-004 before UI-003.
-
 **Event emission contract (for integration proof):**
 - On task creation: emit `TASK_CREATED` with payload `{task_id, title, priority, due_date}`.
 - On task completion: emit `TASK_COMPLETED` with payload `{task_id, completed_at}`.
