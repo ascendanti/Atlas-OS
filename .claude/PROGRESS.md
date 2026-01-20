@@ -214,3 +214,104 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 
 **Blockers:**
 - None noted.
+
+---
+
+## 2026-01-20
+
+**Event Spine Invariant Adoption**
+
+**Architecture Decision:**
+- Adopted COMMAND → EVENT → PROJECTION → (optional) POLICY invariant
+- Events become single canonical truth; projections derive state
+- Simplifies debugging, testing, and audit compliance
+
+**Documentation Updates:**
+- ROADMAP.md: Added Event Spine invariant section
+- FEATURES.md: Renamed CORE-004 to "Event Spine + Audit Log", added acceptance criteria
+- FEATURES.md: Rescoped LIFE-003 to "Goals-as-projection" with event-driven state
+- WORKING_NOTES.md: Appended invariant adoption handoff
+
+**Next Implementation:**
+- Chunk A: CORE-004 Event Spine v0 (events table, emit_event, query_events, explain)
+- Chunk B: LIFE-003 Goals-as-projection (GOAL_DEFINED, GOAL_TARGET_SET, GOAL_UPDATED)
+
+**Blockers:**
+- None
+
+**Implementation Complete:**
+
+**Chunk A: CORE-004 Event Spine v0**
+- ✅ Created `modules/core/event_store.py` (185 lines)
+- ✅ Events table with: id, event_type, entity_type, entity_id, payload (JSON), timestamp
+- ✅ Functions: emit_event, query_events, explain, count
+- ✅ Wired TaskTracker.add() to emit TASK_CREATED event
+- ✅ 14 unit tests in test_event_store.py (all passing)
+
+**Chunk B: LIFE-003 Goals-as-projection v0**
+- ✅ Created `modules/life/goal_manager.py` (198 lines)
+- ✅ Events: GOAL_DEFINED, GOAL_TARGET_SET, GOAL_UPDATED
+- ✅ State derived entirely from events (no direct table mutation)
+- ✅ CLI: `life goals define/set-target/update/list/progress/explain`
+- ✅ 20 unit tests in test_goal_manager.py (all passing)
+
+**Test Results:**
+- 111 tests passing (77 original + 14 event_store + 20 goal_manager)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - GoalManager projects state from events only
+- Entity without event? NO - All goals emit GOAL_DEFINED on creation
+
+**Next Steps:**
+- Add TASK_COMPLETED, TASK_UPDATED events to task_tracker
+- Consider event-sourcing other existing modules
+- Content & Knowledge Management features
+
+---
+
+## 2026-01-20 (continued)
+
+**KNOW-002 Note Manager Implementation**
+
+**Feature:** KNOW-002 Note Manager (Event-sourced)
+**Status:** Complete
+
+**Implementation:**
+- ✅ Created `modules/knowledge/__init__.py`
+- ✅ Created `modules/knowledge/note_manager.py` (198 lines)
+- ✅ Events: NOTE_CREATED, NOTE_UPDATED, NOTE_ARCHIVED, NOTE_TAGGED
+- ✅ Full-text search on title and content
+- ✅ Tag-based organization
+- ✅ 27 unit tests in test_note_manager.py (all passing)
+
+**CLI Commands Added:**
+- `note create <title>` - Create a new note
+- `note edit <id>` - Edit title/content
+- `note list` - List all notes (with tag filter)
+- `note show <id>` - Show note details
+- `note search <query>` - Full-text search
+- `note tag <id> <tags>` - Set tags
+- `note archive <id>` - Soft delete
+- `note tags` - List all unique tags
+- `note explain <id>` - Audit trail
+
+**Test Results:**
+- 138 tests passing (111 previous + 27 new)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - NoteManager projects state from events only
+- Entity without event? NO - All notes emit NOTE_CREATED on creation
+
+**Files Changed:**
+- `modules/knowledge/__init__.py` (NEW)
+- `modules/knowledge/note_manager.py` (NEW)
+- `tests/test_note_manager.py` (NEW)
+- `main.py` (modified - added note CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- KNOW-001 PDF Library Indexer (depends on note_manager for storage)
+- CON-004 Content Idea Bank (similar pattern)
+- Career features (CAR-001, CAR-002)

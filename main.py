@@ -425,6 +425,328 @@ def habits_streak(habit_id):
     click.echo(f"30-day Rate:     {rate*100:.1f}%")
 
 
+# --- Goals ---
+@life.group()
+def goals():
+    """Goal tracking (Event-sourced)"""
+    pass
+
+
+@goals.command("define")
+@click.argument("title")
+@click.option("--description", "-d", default="", help="Goal description")
+def goals_define(title, description):
+    """Define a new goal"""
+    from modules.life.goal_manager import GoalManager
+
+    manager = GoalManager()
+    goal_id = manager.define(title, description)
+    click.echo(f"Defined goal #{goal_id}: {title}")
+
+
+@goals.command("set-target")
+@click.argument("goal_id", type=int)
+@click.argument("target_date")
+@click.option("--value", "-v", type=int, default=100, help="Target value (default 100)")
+def goals_set_target(goal_id, target_date, value):
+    """Set target date for a goal"""
+    from modules.life.goal_manager import GoalManager
+    from modules.core.utils import parse_date
+
+    manager = GoalManager()
+    try:
+        parsed_date = parse_date(target_date)
+    except ValueError:
+        click.echo(f"Error: Invalid date format: {target_date}")
+        return
+
+    if manager.set_target(goal_id, parsed_date, value):
+        click.echo(f"Set target for goal #{goal_id}: {target_date} (value={value})")
+    else:
+        click.echo(f"Error: Goal #{goal_id} not found.")
+
+
+@goals.command("update")
+@click.argument("goal_id", type=int)
+@click.argument("current_value", type=int)
+@click.option("--note", "-n", default="", help="Progress note")
+def goals_update(goal_id, current_value, note):
+    """Update progress on a goal"""
+    from modules.life.goal_manager import GoalManager
+
+    manager = GoalManager()
+    if manager.update_progress(goal_id, current_value, note):
+        progress = manager.progress(goal_id)
+        click.echo(f"Updated goal #{goal_id}: {progress['percentage']:.1f}% complete")
+    else:
+        click.echo(f"Error: Goal #{goal_id} not found.")
+
+
+@goals.command("list")
+def goals_list():
+    """List all goals"""
+    from modules.life.goal_manager import GoalManager
+
+    manager = GoalManager()
+    goal_list = manager.list_goals()
+
+    if not goal_list:
+        click.echo("No goals defined. Add one with: life goals define <title>")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Title':<30} {'Progress':<10} {'Target'}")
+    click.echo("-" * 65)
+
+    for g in goal_list:
+        progress = manager.progress(g['id'])
+        pct = f"{progress['percentage']:.0f}%" if progress else "-"
+        target = g['target_date'] or "-"
+        title = g['title'][:29] + "..." if len(g['title']) > 29 else g['title']
+        click.echo(f"{g['id']:<4} {title:<30} {pct:<10} {target}")
+
+
+@goals.command("progress")
+@click.argument("goal_id", type=int)
+def goals_progress(goal_id):
+    """Show progress for a goal"""
+    from modules.life.goal_manager import GoalManager
+
+    manager = GoalManager()
+    progress = manager.progress(goal_id)
+    if not progress:
+        click.echo(f"Error: Goal #{goal_id} not found.")
+        return
+
+    click.echo(f"\nGoal #{goal_id}: {progress['title']}")
+    click.echo("-" * 40)
+    click.echo(f"Progress:   {progress['current_value']}/{progress['target_value']} ({progress['percentage']:.1f}%)")
+    click.echo(f"Target:     {progress['target_date'] or 'Not set'}")
+    if progress['days_remaining'] is not None:
+        click.echo(f"Remaining:  {progress['days_remaining']} days")
+    click.echo(f"Status:     {progress['status'].upper()}")
+
+
+@goals.command("explain")
+@click.argument("goal_id", type=int)
+def goals_explain(goal_id):
+    """Show event history for a goal (audit trail)"""
+    from modules.life.goal_manager import GoalManager
+
+    manager = GoalManager()
+    events = manager.explain(goal_id)
+    if not events:
+        click.echo(f"Error: Goal #{goal_id} not found or has no events.")
+        return
+
+    click.echo(f"\nEvent History for Goal #{goal_id}:")
+    click.echo("-" * 60)
+
+    for e in events:
+        timestamp = e['timestamp'][:19]
+        event_type = e['event_type']
+        payload_str = ", ".join(f"{k}={v}" for k, v in e['payload'].items())
+        click.echo(f"[{timestamp}] {event_type}")
+        if payload_str:
+            click.echo(f"    {payload_str}")
+
+
+# ============================================================================
+# KNOWLEDGE COMMANDS
+# ============================================================================
+
+@cli.group()
+def note():
+    """Note management (Event-sourced)"""
+    pass
+
+
+@note.command("create")
+@click.argument("title")
+@click.option("--content", "-c", default="", help="Note content")
+@click.option("--tags", "-t", default="", help="Comma-separated tags")
+def note_create(title, content, tags):
+    """Create a new note"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
+    note_id = manager.create(title, content, tag_list)
+    click.echo(f"Created note #{note_id}: {title}")
+
+
+@note.command("edit")
+@click.argument("note_id", type=int)
+@click.option("--title", "-t", default=None, help="New title")
+@click.option("--content", "-c", default=None, help="New content")
+def note_edit(note_id, title, content):
+    """Edit an existing note"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    if title is None and content is None:
+        click.echo("Error: Provide --title or --content to update")
+        return
+
+    if manager.update(note_id, title=title, content=content):
+        click.echo(f"Updated note #{note_id}")
+    else:
+        click.echo(f"Error: Note #{note_id} not found or archived")
+
+
+@note.command("list")
+@click.option("--tag", "-t", default=None, help="Filter by tag")
+@click.option("--archived", "-a", is_flag=True, help="Include archived notes")
+def note_list(tag, archived):
+    """List all notes"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    notes = manager.list_notes(include_archived=archived, tag=tag)
+
+    if not notes:
+        click.echo("No notes found. Create one with: note create <title>")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Title':<35} {'Tags':<20} {'Status'}")
+    click.echo("-" * 70)
+
+    for n in notes:
+        title = n['title'][:34] + "..." if len(n['title']) > 34 else n['title']
+        tags = ", ".join(n['tags'][:3]) if n['tags'] else "-"
+        if len(n['tags']) > 3:
+            tags += "..."
+        status = "ARCHIVED" if n['archived'] else "active"
+        click.echo(f"{n['id']:<4} {title:<35} {tags:<20} {status}")
+
+    click.echo(f"\nTotal: {len(notes)} note(s)")
+
+
+@note.command("show")
+@click.argument("note_id", type=int)
+def note_show(note_id):
+    """Show note details"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    note = manager.get(note_id)
+    if not note:
+        click.echo(f"Error: Note #{note_id} not found")
+        return
+
+    click.echo(f"\nNote #{note['id']}: {note['title']}")
+    click.echo("-" * 50)
+    if note['tags']:
+        click.echo(f"Tags: {', '.join(note['tags'])}")
+    click.echo(f"Status: {'ARCHIVED' if note['archived'] else 'active'}")
+    click.echo(f"Created: {note['created_at'][:19] if note['created_at'] else '-'}")
+    if note['updated_at']:
+        click.echo(f"Updated: {note['updated_at'][:19]}")
+    click.echo("")
+    if note['content']:
+        click.echo(note['content'])
+    else:
+        click.echo("(no content)")
+
+
+@note.command("search")
+@click.argument("query")
+@click.option("--archived", "-a", is_flag=True, help="Include archived notes")
+def note_search(query, archived):
+    """Search notes by title and content"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    results = manager.search(query, include_archived=archived)
+
+    if not results:
+        click.echo(f"No notes found matching '{query}'")
+        return
+
+    click.echo(f"\nSearch results for '{query}':")
+    click.echo("-" * 50)
+
+    for n in results:
+        title = n['title'][:40] + "..." if len(n['title']) > 40 else n['title']
+        click.echo(f"  #{n['id']} {title}")
+
+    click.echo(f"\nFound: {len(results)} note(s)")
+
+
+@note.command("tag")
+@click.argument("note_id", type=int)
+@click.argument("tags")
+def note_tag(note_id, tags):
+    """Set tags on a note (comma-separated)"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()]
+
+    if manager.tag(note_id, tag_list):
+        click.echo(f"Tagged note #{note_id} with: {', '.join(tag_list)}")
+    else:
+        click.echo(f"Error: Note #{note_id} not found or archived")
+
+
+@note.command("archive")
+@click.argument("note_id", type=int)
+def note_archive(note_id):
+    """Archive a note (soft delete)"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    if manager.archive(note_id):
+        click.echo(f"Archived note #{note_id}")
+    else:
+        click.echo(f"Error: Note #{note_id} not found or already archived")
+
+
+@note.command("tags")
+def note_tags():
+    """List all unique tags"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    tags = manager.get_tags()
+
+    if not tags:
+        click.echo("No tags found")
+        return
+
+    click.echo("\nAll tags:")
+    for tag in tags:
+        click.echo(f"  - {tag}")
+
+
+@note.command("explain")
+@click.argument("note_id", type=int)
+def note_explain(note_id):
+    """Show event history for a note (audit trail)"""
+    from modules.knowledge.note_manager import NoteManager
+
+    manager = NoteManager()
+    events = manager.explain(note_id)
+    if not events:
+        click.echo(f"Error: Note #{note_id} not found or has no events")
+        return
+
+    click.echo(f"\nEvent History for Note #{note_id}:")
+    click.echo("-" * 60)
+
+    for e in events:
+        timestamp = e['timestamp'][:19]
+        event_type = e['event_type']
+        payload = e['payload']
+        # Truncate content if present
+        if 'content' in payload:
+            content = payload['content']
+            payload['content'] = content[:50] + "..." if len(content) > 50 else content
+        payload_str = ", ".join(f"{k}={v}" for k, v in payload.items())
+        click.echo(f"[{timestamp}] {event_type}")
+        if payload_str:
+            click.echo(f"    {payload_str}")
+
+
 # ============================================================================
 # FINANCE COMMANDS
 # ============================================================================

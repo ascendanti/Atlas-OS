@@ -12,6 +12,7 @@ from typing import Optional, List
 from enum import Enum
 
 from modules.core.database import Database, get_database
+from modules.core.event_store import EventStore, get_event_store
 
 
 class TaskStatus(Enum):
@@ -47,9 +48,10 @@ class TaskTracker:
         completed_at TIMESTAMP
     """
 
-    def __init__(self, db: Optional[Database] = None):
-        """Initialize task tracker with database."""
+    def __init__(self, db: Optional[Database] = None, event_store: Optional[EventStore] = None):
+        """Initialize task tracker with database and event store."""
         self.db = db or get_database()
+        self.event_store = event_store or get_event_store()
         self._ensure_table()
 
     def _ensure_table(self) -> None:
@@ -84,7 +86,22 @@ class TaskTracker:
             "category": category,
             "due_date": due_date.isoformat() if due_date else None,
         }
-        return self.db.insert(self.TABLE_NAME, data)
+        task_id = self.db.insert(self.TABLE_NAME, data)
+
+        # Emit TASK_CREATED event (Event Spine invariant)
+        self.event_store.emit(
+            event_type="TASK_CREATED",
+            entity_type="task",
+            entity_id=task_id,
+            payload={
+                "title": title,
+                "description": description,
+                "priority": priority.value,
+                "category": category,
+                "due_date": due_date.isoformat() if due_date else None,
+            }
+        )
+        return task_id
 
     def get(self, task_id: int) -> Optional[dict]:
         """

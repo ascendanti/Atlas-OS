@@ -8,6 +8,14 @@
 5) Modular architecture with stable contracts
 6) Explainability: "why did Atlas do/suggest this?"
 
+## Event Spine Invariant (Architectural Constraint)
+**COMMAND → EVENT → PROJECTION → (optional) POLICY**
+
+- All state changes MUST emit events to the canonical `events` table.
+- Projections (read models) are derived from events; no direct mutation.
+- Policies react to events for side effects (notifications, scheduling).
+- UTF is an overlay layer AFTER the spine is stable; UTF transforms consume events.
+
 ## Milestones (Immutable Tail)
 - M1) Kernel v1: unified data model + module registry + migrations + audit log + scheduler hooks
 - M2) UX v1: local dashboard with module panels + global search + inbox triage
