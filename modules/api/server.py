@@ -85,13 +85,13 @@ def get_dashboard():
     habits_done = len([h for h in habits_today if h["completed_today"]]) if habits_today else 0
 
     reminders = reminder_system.upcoming(days=7)
-    notes = note_manager.list_notes(limit=1000)
-    ideas = idea_bank.list_ideas(limit=1000)
-    videos = video_planner.list_videos(limit=1000)
-    podcasts = podcast_scheduler.list_episodes(limit=1000)
-    publications = publication_tracker.list_publications(limit=1000)
-    cv_entries = cv_manager.list_entries(limit=1000)
-    contacts = contact_manager.list(limit=1000)
+    notes = note_manager.list_notes()
+    ideas = idea_bank.list_ideas()
+    videos = video_planner.list_videos()
+    podcasts = podcast_scheduler.list_episodes()
+    publications = publication_tracker.list_publications()
+    cv_entries = cv_manager.list_entries()
+    contacts = contact_manager.list()
 
     return {
         "tasks": {"pending": pending_tasks, "total": len(tasks)},
