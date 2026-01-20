@@ -479,3 +479,37 @@ python main.py video explain 1
 - CAR-001 Publication Tracker
 - KNOW-001 PDF Library Indexer
 - CON-002 Podcast Episode Scheduler
+## 2026-01-22
+
+**Planning/Review Pass:**
+- Completed UI readiness audit for desktop demo lens.
+- Found missing modules referenced in brief (no `modules/core/event_store.py` and no `modules/life/goal_manager.py` in repo).
+- Drafted UI demo spec with Tasks + Audit vertical slice and lens-only constraints.
+- Updated FEATURES/ROADMAP to include UI demo epics and v0.1 demo milestone.
+
+**Notes:**
+- Task and habit trackers exist; UI should call module APIs only.
+- Event emission integration remains a dependency for audit lens.
+
+**Blockers:**
+- Event store module missing; audit lens cannot be wired without it.
+
+## 2026-01-22 (Follow-up)
+
+**Audit Update:**
+- Re-checked local repo for `modules/core/event_store.py` and `modules/life/goal_manager.py`; both absent in this checkout.
+- Added a note in UI demo planning to align UI lens against actual remote signatures if those files exist on GitHub.
+
+**Blockers:**
+- If event_store exists only on remote, sync is required before implementing the audit lens.
+
+## 2026-01-22 (Iteration)
+
+**Planning Update:**
+- Added an explicit implementation order to the UI demo plan with gating on event store availability.
+- Noted a decision needed: confirm remote `event_store` API before UI-003.
+
+## 2026-01-22 (Event Store Confirmation)
+
+**Planning Update:**
+- Confirmed `modules/core/event_store.py` is missing in repo; UI-003 must wait on CORE-004 implementation.

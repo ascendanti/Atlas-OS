@@ -22,6 +22,45 @@ Build modules without asking permission. Only report results when complete.
 
 ## Detailed Resume Process
 
+## Project Review Directives (PM Notes)
+
+Use this only when asked to perform a single-pass review.
+
+# Instructions for Claude Review
+
+## Goal
+Provide a single-pass review of the Atlas-OS codebase focused on achieving an order-of-magnitude (10x) improvement in developer effectiveness or workflow speed. If that impact cannot be achieved, do not propose changes.
+
+## Discrete Next Steps Identified
+1. **Stabilize tests (blocker)**
+   - Implement `format_currency` and `format_percentage` in `modules/core/utils.py` or update tests accordingly.
+   - Run `pytest` after the fix.
+
+2. **Remove hardcoded secrets**
+   - Move the Slack webhook URL to config or environment variables and update `SlackNotifier` default behavior.
+
+3. **Wire configuration into runtime**
+   - Use `Config` to drive DB location/name, module enablement, and user metadata.
+
+4. **Database hardening**
+   - Add indexes for common query paths (tasks due dates, habit completions, contact last_contact, stock prices).
+   - Expand migration/versioning approach if needed for clean upgrades.
+
+5. **CLI parity with module capabilities**
+   - Expose task update/status actions, contact search/update/needs-contact, and habit archive/uncomplete/weekly summary.
+
+6. **Financial module test coverage**
+   - Add tests for watchlist, cached pricing, and portfolio buy/sell flows.
+
+7. **Implement `progress_emailer.py`**
+   - Read `.claude/PROGRESS.md`, generate summary, and send email via configured credentials.
+
+8. **Docs alignment**
+   - Update README examples to match actual CLI commands and current modules.
+
+## Non-goals
+- Do not propose changes unless they clearly provide a 10x improvement in developer effectiveness or workflow speed.
+
 ### Step 1: Start New Claude Session
 
 **Open Claude (chat or Claude Code) and paste:**

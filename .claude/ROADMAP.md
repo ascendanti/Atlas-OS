@@ -29,6 +29,7 @@
 
 ## Near-Term Releases
 - v0.1 (Capture → Organize → Review): kernel schema + module registry + minimal CLI; no daemon.
+- v0.1 Demo Milestone: Desktop Demo (Tasks + Audit vertical slice) as a lens-only UI.
 - v0.2 (Background ops): scheduler + notifications + review loop polish.
 - v0.3 (Power module): choose one spine (knowledge OR finance) based on repo readiness.
 
