@@ -199,3 +199,30 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 
 **Blockers:**
 - None
+
+## 2026-01-20 (CORE-004 Logging System Complete)
+
+**Module:** core/logger.py
+**Feature:** CORE-004
+
+**Actions:**
+- Created `modules/core/logger.py` - Structured JSONL logging system
+- Created `tests/test_logger.py` - 31 comprehensive tests
+- Updated `modules/core/__init__.py` to export Logger, LogLevel, get_logger, log
+
+**Features Implemented:**
+- Log levels: DEBUG, INFO, WARNING, ERROR (ordered by severity)
+- JSONL format with timestamp, level, module, message, context
+- Output to configurable file path (default: data/logs/atlas.log)
+- Log level filtering (min_level configuration)
+- Automatic log directory creation
+- Sensitive data filtering (password, token, api_key, webhook)
+- Read logs functionality with level filtering and limit
+- Module-level convenience functions (get_logger, log)
+
+**Results:**
+- Module: 186 lines (under 200 line limit)
+- Tests: 31 passed
+- Full test suite: 108 passed (77 original + 31 new)
+
+**Blockers:** None

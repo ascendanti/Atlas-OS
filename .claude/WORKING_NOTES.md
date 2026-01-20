@@ -179,3 +179,44 @@ Codex idle: no new Claude handoff since 2026-01-21. No plan changes.
 
 ### Process Note
 Recommend that Codex does not write to WORKING_NOTES.md when idle to avoid future merge conflicts. Only append entries when there is actual work or handoff content to communicate.
+
+---
+
+### [2026-01-21] CLAUDE — COMPLETED: CORE-004 Logging System
+**Scope**
+- Implement `modules/core/logger.py` with structured JSONL logging
+- Add `tests/test_logger.py` with unit tests
+- Update core __init__.py to export logger
+
+**Acceptance Criteria** (all met)
+1. ✅ Log levels: DEBUG, INFO, WARNING, ERROR
+2. ✅ JSONL format with timestamp, level, module, message, context
+3. ✅ Output to data/logs/atlas.log (configurable)
+4. ✅ Log level filtering (config-gated)
+5. ✅ Module <200 lines (186 lines)
+
+**Files Changed**
+- modules/core/logger.py (new - 186 lines)
+- modules/core/__init__.py (updated exports)
+- tests/test_logger.py (new - 31 tests)
+- .claude/FEATURES.md (updated status)
+- .claude/PROGRESS.md (added entry)
+
+**Evidence**
+- 31 logger tests passing
+- 108 total tests passing (77 original + 31 new)
+- Module follows all project rules
+
+**Usage**
+```python
+from modules.core import Logger, get_logger, log
+
+# Option 1: Create logger instance
+logger = Logger(log_path="data/logs/myapp.log", min_level="DEBUG")
+logger.info("Application started", module="main", context={"version": "1.0"})
+
+# Option 2: Use module-level convenience
+log("INFO", "main", "Event occurred", context={"event": "startup"})
+```
+
+---

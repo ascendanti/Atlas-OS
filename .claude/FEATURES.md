@@ -1,7 +1,6 @@
 # Features
 
 ## Backlog
-- CORE-004 Logging System
 - FIN-003 Budget Analyzer (Google Sheets)
 - FIN-004 Expense Categorizer
 - FIN-005 Investment Calculator
@@ -21,23 +20,23 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- CORE-004 Logging System
 - LIFE-003 Goal Manager
 
 ## In Progress
-- None
+(none)
 
 ## Done
 - CORE-001 SQLite Database Manager
 - CORE-002 Task Tracker CLI
 - CORE-003 Configuration Manager
+- CORE-004 Logging System
 - FIN-001 Stock Market Data Fetcher
 - FIN-002 Portfolio Tracker
 - LIFE-001 Contact Manager (Rolodex)
 - LIFE-002 Habit Tracker
 
 ## Proceed vs Blocked
-- Proceed: CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
+- Proceed: FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
 - Blocked: None
 
 ## Financial Features
@@ -91,15 +90,16 @@
 ## Feature Completion Tracking
 
 **Total Features:** 28
-**Complete:** 8
+**Complete:** 9
 **In Progress:** 0
-**Planned:** 21
+**Planned:** 20
 
 **Completed Features:**
 - SPRINT-0000: Dual-agent coordination protocol + WORKING_NOTES.md
 - CORE-001: SQLite Database Manager
 - CORE-002: Task Tracker CLI
 - CORE-003: Configuration Manager
+- CORE-004: Logging System
 - FIN-001: Stock Market Data Fetcher
 - FIN-002: Portfolio Tracker
 - LIFE-001: Contact Manager (Rolodex)
