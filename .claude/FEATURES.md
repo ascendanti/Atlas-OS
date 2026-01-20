@@ -1,25 +1,44 @@
-# Atlas Personal OS - Feature Registry
+# Features
 
-**Query Format:** `/feature [module] [status]`
+## Backlog
+- CORE-004 Logging System
+- FIN-003 Budget Analyzer (Google Sheets)
+- FIN-004 Expense Categorizer
+- FIN-005 Investment Calculator
+- CAR-001 Publication Tracker
+- CAR-002 CV/Resume Manager
+- CAR-003 Job Application Tracker
+- CAR-004 Research Paper Monitor (RSS)
+- CON-001 YouTube Video Planner
+- CON-002 Podcast Episode Scheduler
+- CON-003 Social Media Calendar
+- CON-004 Content Idea Bank
+- LIFE-003 Goal Manager
+- LIFE-004 Event Reminder System
+- KNOW-001 PDF Library Indexer
+- KNOW-002 Note Manager
+- KNOW-003 Research Tracker
+- KNOW-004 Citation Manager
 
-**Status Codes:**
-- `planned` - Design phase
-- `active` - Currently building
-- `testing` - Implementation done, testing
-- `complete` - Tested and working
-- `blocked` - Cannot proceed (dependency/issue)
-- `deferred` - Not priority right now
+## Next
+- CORE-004 Logging System
+- LIFE-003 Goal Manager
 
----
+## In Progress
+- None
 
-## Core Features
+## Done
+- CORE-001 SQLite Database Manager
+- CORE-002 Task Tracker CLI
+- CORE-003 Configuration Manager
+- FIN-001 Stock Market Data Fetcher
+- FIN-002 Portfolio Tracker
+- LIFE-001 Contact Manager (Rolodex)
+- LIFE-002 Habit Tracker
 
-| ID | Feature | Status | Priority | Dependencies |
-|---|---|---|---|---|
-| CORE-001 | SQLite Database Manager | complete | HIGH | None |
-| CORE-002 | Task Tracker CLI | complete | HIGH | CORE-001 |
-| CORE-003 | Configuration Manager | complete | MEDIUM | CORE-001 |
-| CORE-004 | Logging System | planned | LOW | None |
+## Proceed vs Blocked
+- Proceed: CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
+- Blocked: None
 
 ## Financial Features
 
@@ -87,3 +106,6 @@
 - LIFE-002: Habit Tracker
 
 **Next Sprint:** Content & Knowledge Management
+
+## Decision Needed
+- None
