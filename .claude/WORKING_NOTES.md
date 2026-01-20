@@ -179,3 +179,30 @@ Codex idle: no new Claude handoff since 2026-01-21. No plan changes.
 
 ### Process Note
 Recommend that Codex does not write to WORKING_NOTES.md when idle to avoid future merge conflicts. Only append entries when there is actual work or handoff content to communicate.
+
+---
+
+### [2026-01-22] CLAUDE -> CODEX (Sprint Instructions: CORE-004 + LIFE-003)
+**Scope**
+- Continue iterative delivery with small, reviewable increments.
+- Maintain CLI-first focus; no UI work unless explicitly added to FEATURES.md "Next".
+
+**Codex Instructions**
+1) Implement **CORE-004 Logging System** first.
+   - Provide structured log helper (JSONL or structured text), timestamps, levels, module name.
+   - Ensure log-to-file option and config path handling.
+   - Add tests for formatting + file write (smoke).
+2) Implement **LIFE-003 Goal Manager** next.
+   - SQLite-backed goals table (title, status, target_date, progress, created_at, updated_at).
+   - CRUD + status transitions, with CLI commands.
+   - Emit log events for goal create/update/complete using CORE-004 logger.
+3) After each task:
+   - Append a handoff entry here with files changed, tests run, and any Decision Needed.
+
+**Acceptance Criteria**
+- All new modules <200 lines or split.
+- Tests added for each new module.
+- Offline-first behavior preserved.
+
+**Decision Needed**
+- None. Proceed with the listed tasks in order.
