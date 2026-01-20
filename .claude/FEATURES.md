@@ -26,9 +26,9 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- KNOW-001 PDF Library Indexer
 - CON-002 Podcast Episode Scheduler (Event-sourced)
 - CAR-002 CV/Resume Manager
+- KNOW-003 Research Tracker
 
 ## Acceptance Criteria
 
@@ -96,6 +96,15 @@
 - Unit tests for workflow transitions
 - Works 100% offline, <200 lines
 
+### KNOW-001 PDF Library Indexer (Event-sourced)
+- Events: PDF_INDEXED, PDF_UPDATED, PDF_TAGGED, PDF_ARCHIVED
+- PDF fields: title, authors, file_path, page_count, indexed_at, tags, notes, category
+- CLI: `pdf index <path>`, `pdf list`, `pdf show <id>`, `pdf search <query>`, `pdf tag <id> <tags>`, `pdf note <id> <note>`, `pdf explain <id>`
+- Full-text search on title, authors, notes
+- Tag-based organization
+- Unit tests for CRUD + search
+- Works 100% offline, <200 lines
+
 ### CON-004 Content Idea Bank (Event-sourced)
 - Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
 - Idea fields: title, description, platform (youtube/podcast/blog/social), status (draft/planned/in_progress/published/archived), priority
@@ -127,6 +136,7 @@
 - UI-003 Audit Lens ✓ (2026-01-20)
 - CON-001 YouTube Video Planner ✓ (2026-01-20)
 - CAR-001 Publication Tracker ✓ (2026-01-20)
+- KNOW-001 PDF Library Indexer ✓ (2026-01-20)
 
 ## Proceed vs Blocked
 - Proceed: UI-001, UI-002, UI-003, UI-004, UI-005, CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
@@ -210,13 +220,9 @@
 ## Feature Completion Tracking
 
 **Total Features:** 33
-**Complete:** 17
+**Complete:** 18
 **In Progress:** 0
-**Planned:** 16
-**Total Features:** 33
-**Complete:** 8
-**In Progress:** 0
-**Planned:** 26
+**Planned:** 15
 
 **Completed Features:**
 - SPRINT-0000: Dual-agent coordination protocol + WORKING_NOTES.md
@@ -236,6 +242,7 @@
 - UI-003: Audit Lens
 - CON-001: YouTube Video Planner (Event-sourced)
 - CAR-001: Publication Tracker (Event-sourced)
+- KNOW-001: PDF Library Indexer (Event-sourced)
 
 **Next Sprint:** Desktop Demo (Tasks + Audit)
 

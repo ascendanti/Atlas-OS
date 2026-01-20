@@ -1407,6 +1407,184 @@ def video_explain(video_id):
 
 
 # ============================================================================
+# PDF COMMANDS (KNOW-001)
+# ============================================================================
+
+@cli.group()
+def pdf():
+    """PDF library indexing (Event-sourced)"""
+    pass
+
+
+@pdf.command("index")
+@click.argument("path")
+@click.option("--title", "-t", default="", help="PDF title")
+@click.option("--authors", "-a", default="", help="Comma-separated author names")
+@click.option("--category", "-c", type=click.Choice(["research", "book", "article", "manual", "other"]), default="other")
+@click.option("--tags", default="", help="Comma-separated tags")
+@click.option("--pages", "-p", type=int, default=0, help="Page count")
+def pdf_index(path, title, authors, category, tags, pages):
+    """Index a PDF file"""
+    from modules.knowledge.pdf_indexer import PDFIndexer, PDFCategory
+
+    indexer = PDFIndexer()
+    pdf_id = indexer.index(
+        file_path=path,
+        title=title,
+        authors=authors,
+        category=PDFCategory(category),
+        tags=tags,
+        page_count=pages
+    )
+    click.echo(f"PDF indexed with ID: {pdf_id}")
+
+
+@pdf.command("list")
+@click.option("--category", "-c", type=click.Choice(["research", "book", "article", "manual", "other"]))
+@click.option("--tag", "-t", default=None, help="Filter by tag")
+@click.option("--archived", "-a", is_flag=True, help="Include archived PDFs")
+def pdf_list(category, tag, archived):
+    """List indexed PDFs"""
+    from modules.knowledge.pdf_indexer import PDFIndexer, PDFCategory
+
+    indexer = PDFIndexer()
+    category_filter = PDFCategory(category) if category else None
+    pdfs = indexer.list_pdfs(category=category_filter, tag=tag, include_archived=archived)
+
+    if not pdfs:
+        click.echo("No PDFs found.")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Category':<10} {'Pages':<6} {'Title'}")
+    click.echo("-" * 65)
+
+    for p in pdfs:
+        title = p['title'][:40] + "..." if len(p['title']) > 40 else p['title']
+        pages = str(p['page_count']) if p['page_count'] else "-"
+        click.echo(f"{p['id']:<4} {p['category']:<10} {pages:<6} {title}")
+
+    click.echo(f"\nTotal: {len(pdfs)} PDF(s)")
+
+
+@pdf.command("show")
+@click.argument("pdf_id", type=int)
+def pdf_show(pdf_id):
+    """Show PDF details"""
+    from modules.knowledge.pdf_indexer import PDFIndexer
+
+    indexer = PDFIndexer()
+    pdf = indexer.get(pdf_id)
+
+    if not pdf:
+        click.echo(f"PDF {pdf_id} not found.")
+        return
+
+    click.echo(f"\nPDF #{pdf['id']}")
+    click.echo(f"Title: {pdf['title']}")
+    click.echo(f"Authors: {pdf['authors'] or '-'}")
+    click.echo(f"Category: {pdf['category']}")
+    click.echo(f"File: {pdf['file_path']}")
+    click.echo(f"Pages: {pdf['page_count'] or '-'}")
+    click.echo(f"Tags: {pdf['tags'] or '-'}")
+    click.echo(f"Indexed: {pdf['indexed_at'][:19] if pdf['indexed_at'] else '-'}")
+    click.echo(f"Status: {'ARCHIVED' if pdf['archived'] else 'active'}")
+    if pdf['notes']:
+        click.echo(f"\nNotes:\n{pdf['notes']}")
+
+
+@pdf.command("search")
+@click.argument("query")
+@click.option("--archived", "-a", is_flag=True, help="Include archived PDFs")
+def pdf_search(query, archived):
+    """Search PDFs by title, authors, or notes"""
+    from modules.knowledge.pdf_indexer import PDFIndexer
+
+    indexer = PDFIndexer()
+    results = indexer.search(query, include_archived=archived)
+
+    if not results:
+        click.echo(f"No PDFs found matching '{query}'")
+        return
+
+    click.echo(f"\nSearch results for '{query}':")
+    click.echo("-" * 50)
+
+    for p in results:
+        title = p['title'][:40] + "..." if len(p['title']) > 40 else p['title']
+        click.echo(f"  #{p['id']} {title}")
+
+    click.echo(f"\nFound: {len(results)} PDF(s)")
+
+
+@pdf.command("tag")
+@click.argument("pdf_id", type=int)
+@click.argument("tags")
+def pdf_tag(pdf_id, tags):
+    """Set tags on a PDF (comma-separated)"""
+    from modules.knowledge.pdf_indexer import PDFIndexer
+
+    indexer = PDFIndexer()
+    if indexer.tag(pdf_id, tags):
+        click.echo(f"Tagged PDF #{pdf_id} with: {tags}")
+    else:
+        click.echo(f"Error: PDF #{pdf_id} not found or archived")
+
+
+@pdf.command("note")
+@click.argument("pdf_id", type=int)
+@click.argument("note_text")
+def pdf_note(pdf_id, note_text):
+    """Add a note to a PDF"""
+    from modules.knowledge.pdf_indexer import PDFIndexer
+
+    indexer = PDFIndexer()
+    if indexer.add_note(pdf_id, note_text):
+        click.echo(f"Added note to PDF #{pdf_id}")
+    else:
+        click.echo(f"Error: PDF #{pdf_id} not found or archived")
+
+
+@pdf.command("archive")
+@click.argument("pdf_id", type=int)
+def pdf_archive(pdf_id):
+    """Archive a PDF (soft delete)"""
+    from modules.knowledge.pdf_indexer import PDFIndexer
+
+    indexer = PDFIndexer()
+    if indexer.archive(pdf_id):
+        click.echo(f"Archived PDF #{pdf_id}")
+    else:
+        click.echo(f"Error: PDF #{pdf_id} not found or already archived")
+
+
+@pdf.command("explain")
+@click.argument("pdf_id", type=int)
+def pdf_explain(pdf_id):
+    """Show PDF event history (audit trail)"""
+    from modules.knowledge.pdf_indexer import PDFIndexer
+    import json
+
+    indexer = PDFIndexer()
+    events = indexer.explain(pdf_id)
+
+    if not events:
+        click.echo(f"No events found for PDF {pdf_id}.")
+        return
+
+    click.echo(f"\nEvent history for PDF #{pdf_id}:")
+    click.echo("-" * 60)
+
+    for event in events:
+        payload = event['payload']
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        click.echo(f"\n[{event['timestamp']}] {event['event_type']}")
+        for k, v in payload.items():
+            if v:
+                click.echo(f"  {k}: {v}")
+
+
+# ============================================================================
 # UI COMMAND
 # ============================================================================
 

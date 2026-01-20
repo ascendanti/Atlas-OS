@@ -536,3 +536,60 @@ python main.py pub explain 1
 - KNOW-001 PDF Library Indexer
 - CON-002 Podcast Episode Scheduler
 - CAR-002 CV/Resume Manager
+
+---
+
+## 2026-01-20 (continued)
+
+**KNOW-001 PDF Library Indexer Implementation**
+
+**Feature:** KNOW-001 PDF Library Indexer (Event-sourced)
+**Status:** Complete
+
+**Implementation:**
+- ✅ Created `modules/knowledge/pdf_indexer.py` (198 lines)
+- ✅ Events: PDF_INDEXED, PDF_UPDATED, PDF_TAGGED, PDF_NOTE_ADDED, PDF_ARCHIVED
+- ✅ Categories: research, book, article, manual, other
+- ✅ Full-text search on title, authors, notes
+- ✅ Tag-based organization
+- ✅ 34 unit tests in test_pdf_indexer.py (all passing)
+
+**CLI Commands Added:**
+- `pdf index <path>` - Index a PDF file
+- `pdf list` - List PDFs (filter by category/tag)
+- `pdf show <id>` - Show PDF details
+- `pdf search <query>` - Full-text search
+- `pdf tag <id> <tags>` - Set tags
+- `pdf note <id> <note>` - Add a note
+- `pdf archive <id>` - Soft delete
+- `pdf explain <id>` - Audit trail
+
+**Test Results:**
+- 241 tests passing (207 previous + 34 new)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - PDFIndexer projects state from events only
+- Entity without event? NO - All PDFs emit PDF_INDEXED on creation
+
+**How to Run:**
+```bash
+python main.py pdf index "/path/to/document.pdf" -t "Deep Learning" -a "Smith, J." -c research
+python main.py pdf list
+python main.py pdf search "deep learning"
+python main.py pdf tag 1 "ml,ai,important"
+python main.py pdf note 1 "Key findings on page 10"
+python main.py pdf explain 1
+```
+
+**Files Changed:**
+- `modules/knowledge/pdf_indexer.py` (NEW)
+- `modules/knowledge/__init__.py` (modified)
+- `tests/test_pdf_indexer.py` (NEW)
+- `main.py` (modified - added pdf CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- CON-002 Podcast Episode Scheduler
+- CAR-002 CV/Resume Manager
+- KNOW-003 Research Tracker
