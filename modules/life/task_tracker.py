@@ -207,11 +207,30 @@ class TaskTracker:
         Returns:
             True if task was completed
         """
-        return self.update(
+        task = self.get(task_id)
+        if not task:
+            return False
+
+        completed_at = datetime.now().isoformat()
+        result = self.update(
             task_id,
             status=TaskStatus.COMPLETED,
-            completed_at=datetime.now().isoformat()
+            completed_at=completed_at
         )
+
+        if result:
+            # Emit TASK_COMPLETED event (Event Spine invariant)
+            self.event_store.emit(
+                event_type="TASK_COMPLETED",
+                entity_type="task",
+                entity_id=task_id,
+                payload={
+                    "title": task["title"],
+                    "completed_at": completed_at,
+                }
+            )
+
+        return result
 
     def delete(self, task_id: int) -> bool:
         """

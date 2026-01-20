@@ -362,3 +362,63 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 - CON-001 YouTube Video Planner (builds on idea_bank)
 - CAR-001 Publication Tracker
 - KNOW-001 PDF Library Indexer
+
+---
+
+## 2026-01-20 (continued)
+
+**UI-001/002/003 Desktop Demo Implementation**
+
+**Feature:** UI Demo (Tkinter)
+**Status:** Complete
+
+**Integration Fix:**
+- ✅ Added TASK_COMPLETED event emission to `task_tracker.py`
+- Task completion now emits event with title and completed_at timestamp
+
+**Implementation:**
+- ✅ Created `modules/ui/__init__.py`
+- ✅ Created `modules/ui/app.py` (197 lines)
+- ✅ Added `python main.py ui` command
+
+**UI Features:**
+- Two tabs: Tasks and Audit
+- Tasks tab:
+  - Lists tasks from TaskTracker.list()
+  - Add Task form (title, priority, category)
+  - Complete Task button for selected row
+  - Refresh button
+- Audit tab:
+  - Lists recent events from EventStore.query()
+  - Columns: timestamp, event_type, entity_type, entity_id
+  - Click event to show payload JSON in detail pane
+
+**Test Results:**
+- 163 tests passing (unchanged - UI tests deferred)
+
+**Invariant Audit:**
+- UI calls module functions only (no direct SQL) ✓
+- Events are canonical truth ✓
+- Task add/complete emit TASK_CREATED/TASK_COMPLETED ✓
+
+**How to Run:**
+```bash
+# Run the desktop UI
+python main.py ui
+
+# Verify CLI still works
+python main.py task list
+python main.py task add "Test task"
+```
+
+**Files Changed:**
+- `modules/life/task_tracker.py` (modified - emit TASK_COMPLETED)
+- `modules/ui/__init__.py` (NEW)
+- `modules/ui/app.py` (NEW)
+- `main.py` (modified - added ui command)
+- `.claude/FEATURES.md` (modified - added UI acceptance criteria)
+
+**Next Steps:**
+- Add more UI polish (empty states, error handling)
+- Add Habits/Goals tabs as additional lenses
+- Consider cross-platform UI alternatives for distribution

@@ -360,3 +360,38 @@ python main.py idea explain 1
 - CON-001 YouTube Video Planner
 - CAR-001 Publication Tracker
 - KNOW-001 PDF Library Indexer
+
+---
+
+### [2026-01-20] CLAUDE — UI-001/002/003 Desktop Demo Complete
+**Summary**
+Implemented Tkinter desktop UI proving Event Spine architecture.
+
+**Integration Fix**
+- Added TASK_COMPLETED event emission to task_tracker.complete()
+- Now both TASK_CREATED and TASK_COMPLETED emit to event spine
+
+**Implementation**
+- `modules/ui/app.py` (197 lines)
+- Two tabs: Tasks and Audit
+- Tasks: list/add/complete using TaskTracker functions
+- Audit: lists events from EventStore, shows payload on click
+- Launch: `python main.py ui`
+
+**CLI Commands**
+```bash
+python main.py ui  # Launch desktop UI
+```
+
+**Test Results**
+- 163 tests passing
+
+**Invariant Audit**
+- UI is a lens (no direct SQL) ✓
+- Events are truth ✓
+- Both task events emit ✓
+
+**Next Candidates**
+- Add Habits/Goals tabs
+- Polish UI (empty states, validation)
+- CON-001 YouTube Video Planner

@@ -1066,5 +1066,17 @@ def status():
         click.echo(f"\nUpcoming Birthdays: {len(birthdays)} this week")
 
 
+# ============================================================================
+# UI COMMAND
+# ============================================================================
+
+@cli.command("ui")
+def launch_ui():
+    """Launch the Atlas desktop UI (Tkinter)"""
+    from modules.ui.app import launch
+    click.echo("Launching Atlas Desktop UI...")
+    launch()
+
+
 if __name__ == "__main__":
     cli()

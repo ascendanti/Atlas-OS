@@ -20,9 +20,31 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- CON-004 Content Idea Bank (Event-sourced)
+- CON-001 YouTube Video Planner (Event-sourced, builds on idea_bank)
+- CAR-001 Publication Tracker (Event-sourced)
+- KNOW-001 PDF Library Indexer
 
 ## Acceptance Criteria
+
+### UI-001 Desktop Demo Shell
+- Tkinter app launches with `python main.py ui`
+- Two tabs: "Tasks" and "Audit"
+- Clean window layout with tab navigation
+- Works 100% offline
+
+### UI-002 Tasks Lens
+- Lists tasks from TaskTracker.list() in a table
+- Add Task form (title, priority, category)
+- Complete Task button for selected row
+- Uses module command functions (no direct SQL)
+- Refreshes list after add/complete (no restart)
+- Basic empty states + minimal error messaging
+
+### UI-003 Audit Lens
+- Lists recent events from EventStore.query()
+- Columns: timestamp, event_type, entity_type, entity_id
+- Click event to show payload JSON in detail pane
+- Confirms TASK_CREATED and TASK_COMPLETED events appear
 
 ### CORE-004 Event Spine + Audit Log
 - `events` table: id, event_type, entity_type, entity_id, payload (JSON), timestamp
@@ -73,6 +95,9 @@
 - LIFE-003 Goal Manager (Goals-as-projection) ✓ (2026-01-20)
 - KNOW-002 Note Manager (Event-sourced) ✓ (2026-01-20)
 - CON-004 Content Idea Bank (Event-sourced) ✓ (2026-01-20)
+- UI-001 Desktop Demo Shell ✓ (2026-01-20)
+- UI-002 Tasks Lens ✓ (2026-01-20)
+- UI-003 Audit Lens ✓ (2026-01-20)
 
 ## Proceed vs Blocked
 - Proceed: CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
@@ -128,10 +153,10 @@
 
 ## Feature Completion Tracking
 
-**Total Features:** 28
-**Complete:** 12
+**Total Features:** 31
+**Complete:** 15
 **In Progress:** 0
-**Planned:** 17
+**Planned:** 16
 
 **Completed Features:**
 - SPRINT-0000: Dual-agent coordination protocol + WORKING_NOTES.md
@@ -146,6 +171,9 @@
 - LIFE-003: Goal Manager (Goals-as-projection)
 - KNOW-002: Note Manager (Event-sourced)
 - CON-004: Content Idea Bank (Event-sourced)
+- UI-001: Desktop Demo Shell
+- UI-002: Tasks Lens
+- UI-003: Audit Lens
 
 **Next Sprint:** Content & Knowledge Management
 
