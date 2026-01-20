@@ -1,61 +1,134 @@
 @import "tailwindcss";
 
-/* Custom component styles */
-.nav-tab {
-  @apply px-4 py-3 text-gray-600 border-b-2 border-transparent hover:text-atlas-primary transition;
+/* Navigation */
+.nav-item {
+  @apply w-full text-left px-3 py-2 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white transition flex items-center gap-2 text-sm;
 }
 
-.nav-tab.active {
-  @apply text-atlas-primary border-atlas-primary;
+.nav-item.active {
+  @apply bg-blue-600 text-white;
 }
 
-.tab-content {
-  @apply block;
+.nav-item .icon {
+  @apply w-5 text-center;
 }
 
-.tab-content.hidden {
+.nav-group {
+  @apply mt-4;
+}
+
+.nav-group-label {
+  @apply px-3 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider;
+}
+
+/* Sections */
+.section {
   @apply hidden;
 }
 
-/* Task item styles */
-.task-item {
-  @apply p-4 flex items-center justify-between hover:bg-gray-50 transition;
+.section.active {
+  @apply block;
 }
 
-.task-item.completed {
-  @apply bg-gray-50 opacity-60;
+/* Cards */
+.card {
+  @apply bg-gray-800 rounded-lg border border-gray-700 overflow-hidden;
 }
 
-.task-priority {
+/* Stat Cards for Dashboard */
+.stat-card {
+  @apply bg-gray-800 rounded-lg border border-gray-700 p-4;
+}
+
+.stat-card .stat-value {
+  @apply text-2xl font-bold text-white;
+}
+
+.stat-card .stat-label {
+  @apply text-sm text-gray-400 mt-1;
+}
+
+.stat-card .stat-icon {
+  @apply text-2xl mb-2;
+}
+
+/* Inputs */
+.input {
+  @apply bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none;
+}
+
+/* Buttons */
+.btn-primary {
+  @apply bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition;
+}
+
+.btn-secondary {
+  @apply bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg font-medium transition;
+}
+
+.btn-success {
+  @apply bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition;
+}
+
+/* List Items */
+.list-item {
+  @apply p-4 hover:bg-gray-750 transition flex items-center justify-between;
+}
+
+.list-item:hover {
+  background-color: rgba(55, 65, 81, 0.5);
+}
+
+/* Status Badges */
+.badge {
   @apply px-2 py-1 rounded text-xs font-medium;
 }
 
-.task-priority.low {
-  @apply bg-gray-200 text-gray-700;
+.badge-blue { @apply bg-blue-900 text-blue-300; }
+.badge-green { @apply bg-green-900 text-green-300; }
+.badge-yellow { @apply bg-yellow-900 text-yellow-300; }
+.badge-red { @apply bg-red-900 text-red-300; }
+.badge-purple { @apply bg-purple-900 text-purple-300; }
+.badge-gray { @apply bg-gray-700 text-gray-300; }
+
+/* Progress Bar */
+.progress-bar {
+  @apply bg-gray-700 rounded-full h-2 overflow-hidden;
 }
 
-.task-priority.medium {
-  @apply bg-blue-100 text-blue-700;
+.progress-bar .progress-fill {
+  @apply bg-blue-500 h-full transition-all duration-300;
 }
 
-.task-priority.high {
-  @apply bg-orange-100 text-orange-700;
-}
-
-.task-priority.urgent {
-  @apply bg-red-100 text-red-700;
-}
-
-/* Event item styles */
-.event-item {
-  @apply p-4 hover:bg-gray-50 cursor-pointer transition;
-}
-
-.event-item.selected {
-  @apply bg-blue-50;
-}
-
-/* Empty state */
+/* Empty State */
 .empty-state {
   @apply p-8 text-center text-gray-500;
+}
+
+/* Priority Colors */
+.priority-low { @apply text-gray-400; }
+.priority-medium { @apply text-blue-400; }
+.priority-high { @apply text-orange-400; }
+.priority-urgent { @apply text-red-400; }
+
+/* Status Colors */
+.status-pending { @apply text-yellow-400; }
+.status-in_progress { @apply text-blue-400; }
+.status-completed { @apply text-green-400; }
+.status-draft { @apply text-gray-400; }
+.status-planned { @apply text-blue-400; }
+.status-published { @apply text-green-400; }
+
+/* Checkbox */
+.checkbox {
+  @apply w-5 h-5 rounded border-2 border-gray-600 bg-gray-700 appearance-none cursor-pointer;
+}
+
+.checkbox:checked {
+  @apply bg-green-500 border-green-500;
+}
+
+.checkbox:checked::after {
+  content: "✓";
+  @apply text-white text-xs flex items-center justify-center;
 }

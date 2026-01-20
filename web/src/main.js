@@ -1,104 +1,405 @@
 /**
  * Atlas Personal OS - Web UI
- *
- * Frontend JavaScript for the web interface.
- * Communicates with FastAPI backend at /api endpoints.
+ * Full dashboard for all 22 modules
  */
 
-const API_BASE = '/api';
+const API = '/api';
 
-// Tab navigation
-function initTabs() {
-  const tabs = document.querySelectorAll('.nav-tab');
-  const contents = document.querySelectorAll('.tab-content');
+// Navigation
+function initNavigation() {
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.dataset.section;
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const targetId = tab.dataset.tab + '-tab';
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
 
-      tabs.forEach(t => t.classList.remove('active'));
-      contents.forEach(c => c.classList.add('hidden'));
+      btn.classList.add('active');
+      document.getElementById(`${section}-section`).classList.add('active');
 
-      tab.classList.add('active');
-      document.getElementById(targetId).classList.remove('hidden');
-
-      // Load data for the tab
-      loadTabData(tab.dataset.tab);
+      loadSection(section);
     });
   });
 }
 
-// Load data based on active tab
-function loadTabData(tab) {
-  switch(tab) {
-    case 'tasks': loadTasks(); break;
-    case 'audit': loadEvents(); break;
-    case 'goals': loadGoals(); break;
-    case 'notes': loadNotes(); break;
+function loadSection(section) {
+  const loaders = {
+    dashboard: loadDashboard,
+    tasks: loadTasks,
+    goals: loadGoals,
+    habits: loadHabits,
+    reminders: loadReminders,
+    contacts: loadContacts,
+    ideas: loadIdeas,
+    videos: loadVideos,
+    podcasts: loadPodcasts,
+    publications: loadPublications,
+    cv: loadCV,
+    notes: loadNotes,
+    pdfs: loadPDFs,
+    portfolio: loadPortfolio,
+    events: loadEvents,
+  };
+  if (loaders[section]) loaders[section]();
+}
+
+// Dashboard
+async function loadDashboard() {
+  const container = document.getElementById('dashboard-grid');
+  try {
+    const data = await fetch(`${API}/dashboard`).then(r => r.json());
+    container.innerHTML = `
+      <div class="stat-card" onclick="navigateTo('tasks')">
+        <div class="stat-icon">✓</div>
+        <div class="stat-value">${data.tasks.pending}</div>
+        <div class="stat-label">Pending Tasks</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('goals')">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value">${data.goals.active}</div>
+        <div class="stat-label">Active Goals</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('habits')">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">${data.habits.completed_today}/${data.habits.total}</div>
+        <div class="stat-label">Habits Today</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('reminders')">
+        <div class="stat-icon">⏰</div>
+        <div class="stat-value">${data.reminders.upcoming_week}</div>
+        <div class="stat-label">Upcoming Reminders</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('notes')">
+        <div class="stat-icon">📝</div>
+        <div class="stat-value">${data.notes.total}</div>
+        <div class="stat-label">Notes</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('ideas')">
+        <div class="stat-icon">💡</div>
+        <div class="stat-value">${data.ideas.total}</div>
+        <div class="stat-label">Content Ideas</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('videos')">
+        <div class="stat-icon">🎬</div>
+        <div class="stat-value">${data.videos.total}</div>
+        <div class="stat-label">Videos</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('podcasts')">
+        <div class="stat-icon">🎙️</div>
+        <div class="stat-value">${data.podcasts.total}</div>
+        <div class="stat-label">Podcasts</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('publications')">
+        <div class="stat-icon">📄</div>
+        <div class="stat-value">${data.publications.total}</div>
+        <div class="stat-label">Publications</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('cv')">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value">${data.cv_entries.total}</div>
+        <div class="stat-label">CV Entries</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('contacts')">
+        <div class="stat-icon">👤</div>
+        <div class="stat-value">${data.contacts.total}</div>
+        <div class="stat-label">Contacts</div>
+      </div>
+      <div class="stat-card" onclick="navigateTo('events')">
+        <div class="stat-icon">📜</div>
+        <div class="stat-value">∞</div>
+        <div class="stat-label">Audit Events</div>
+      </div>
+    `;
+  } catch (e) {
+    container.innerHTML = '<div class="stat-card text-red-400">API not available. Run: python main.py web</div>';
   }
+}
+
+function navigateTo(section) {
+  document.querySelector(`[data-section="${section}"]`).click();
 }
 
 // Tasks
 async function loadTasks() {
   const container = document.getElementById('tasks-list');
   try {
-    const response = await fetch(`${API_BASE}/tasks`);
-    const tasks = await response.json();
-
-    if (tasks.length === 0) {
-      container.innerHTML = '<div class="empty-state">No tasks yet. Add one above!</div>';
+    const tasks = await fetch(`${API}/tasks`).then(r => r.json());
+    if (!tasks.length) {
+      container.innerHTML = '<div class="empty-state">No tasks. Add one above!</div>';
       return;
     }
-
-    container.innerHTML = tasks.map(task => `
-      <div class="task-item ${task.status === 'completed' ? 'completed' : ''}" data-id="${task.id}">
-        <div class="flex items-center gap-4">
-          <input type="checkbox" ${task.status === 'completed' ? 'checked' : ''}
-                 onchange="toggleTask(${task.id})" class="w-5 h-5">
+    container.innerHTML = tasks.map(t => `
+      <div class="list-item">
+        <div class="flex items-center gap-3">
+          <input type="checkbox" class="checkbox" ${t.status === 'completed' ? 'checked' : ''}
+                 onchange="completeTask(${t.id})">
           <div>
-            <div class="font-medium ${task.status === 'completed' ? 'line-through' : ''}">${task.title}</div>
-            <div class="text-sm text-gray-500">${task.category || 'No category'}</div>
+            <div class="${t.status === 'completed' ? 'line-through text-gray-500' : ''}">${t.title}</div>
+            <div class="text-xs text-gray-500">${t.category || 'No category'}</div>
           </div>
         </div>
-        <span class="task-priority ${task.priority.toLowerCase()}">${task.priority}</span>
+        <span class="badge badge-${t.priority === 'URGENT' ? 'red' : t.priority === 'HIGH' ? 'yellow' : 'blue'}">${t.priority}</span>
       </div>
     `).join('');
-  } catch (error) {
-    container.innerHTML = '<div class="empty-state text-red-500">Failed to load tasks. Is the API running?</div>';
-    console.error('Failed to load tasks:', error);
-  }
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
 }
 
-async function addTask(event) {
-  event.preventDefault();
-
-  const title = document.getElementById('task-title').value.trim();
-  const priority = document.getElementById('task-priority').value;
-  const category = document.getElementById('task-category').value.trim();
-
-  if (!title) return;
-
-  try {
-    await fetch(`${API_BASE}/tasks`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, priority, category })
-    });
-
-    document.getElementById('task-title').value = '';
-    document.getElementById('task-category').value = '';
-    loadTasks();
-  } catch (error) {
-    console.error('Failed to add task:', error);
-  }
+async function completeTask(id) {
+  await fetch(`${API}/tasks/${id}/complete`, { method: 'POST' });
+  loadTasks();
 }
 
-async function toggleTask(taskId) {
+// Goals
+async function loadGoals() {
+  const container = document.getElementById('goals-list');
   try {
-    await fetch(`${API_BASE}/tasks/${taskId}/complete`, { method: 'POST' });
-    loadTasks();
-  } catch (error) {
-    console.error('Failed to toggle task:', error);
+    const goals = await fetch(`${API}/goals`).then(r => r.json());
+    if (!goals.length) { container.innerHTML = '<div class="empty-state">No goals defined</div>'; return; }
+    container.innerHTML = goals.map(g => `
+      <div class="mb-4">
+        <div class="flex justify-between mb-1">
+          <span class="font-medium">${g.title}</span>
+          <span class="text-sm text-gray-400">${g.percentage.toFixed(0)}%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width: ${g.percentage}%"></div>
+        </div>
+        <div class="text-xs text-gray-500 mt-1">Target: ${g.target_date || 'Not set'}</div>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// Habits
+async function loadHabits() {
+  const container = document.getElementById('habits-list');
+  try {
+    const habits = await fetch(`${API}/habits`).then(r => r.json());
+    if (!habits.length) { container.innerHTML = '<div class="empty-state">No habits tracked</div>'; return; }
+    container.innerHTML = habits.map(h => `
+      <div class="list-item">
+        <div class="flex items-center gap-3">
+          <input type="checkbox" class="checkbox" ${h.completed_today ? 'checked' : ''}
+                 onchange="completeHabit(${h.id})">
+          <div>
+            <div>${h.name}</div>
+            <div class="text-xs text-gray-500">${h.frequency} • ${h.current_streak} day streak</div>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+async function completeHabit(id) {
+  await fetch(`${API}/habits/${id}/complete`, { method: 'POST' });
+  loadHabits();
+}
+
+// Reminders
+async function loadReminders() {
+  const container = document.getElementById('reminders-list');
+  try {
+    const reminders = await fetch(`${API}/reminders?days=30`).then(r => r.json());
+    if (!reminders.length) { container.innerHTML = '<div class="empty-state">No upcoming reminders</div>'; return; }
+    container.innerHTML = reminders.map(r => `
+      <div class="list-item">
+        <div>
+          <div>${r.title}</div>
+          <div class="text-sm text-gray-400">${r.event_date} ${r.event_time}</div>
+        </div>
+        <span class="badge badge-${r.recurrence !== 'none' ? 'purple' : 'gray'}">${r.recurrence}</span>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// Contacts
+async function loadContacts() {
+  const container = document.getElementById('contacts-list');
+  try {
+    const contacts = await fetch(`${API}/contacts`).then(r => r.json());
+    if (!contacts.length) { container.innerHTML = '<div class="empty-state">No contacts</div>'; return; }
+    container.innerHTML = contacts.map(c => `
+      <div class="list-item">
+        <div>
+          <div class="font-medium">${c.first_name} ${c.last_name}</div>
+          <div class="text-sm text-gray-400">${c.email || c.phone || 'No contact info'}</div>
+        </div>
+        <span class="badge badge-gray">${c.category || 'other'}</span>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// Ideas
+async function loadIdeas() {
+  const container = document.getElementById('ideas-list');
+  try {
+    const ideas = await fetch(`${API}/ideas`).then(r => r.json());
+    if (!ideas.length) { container.innerHTML = '<div class="empty-state">No content ideas</div>'; return; }
+    container.innerHTML = ideas.map(i => `
+      <div class="list-item">
+        <div>
+          <div>${i.title}</div>
+          <div class="text-sm text-gray-400">${i.platform}</div>
+        </div>
+        <div class="flex gap-2">
+          <span class="badge badge-blue">${i.status}</span>
+          <span class="badge badge-gray">P${i.priority}</span>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// Videos
+async function loadVideos() {
+  const container = document.getElementById('videos-list');
+  try {
+    const videos = await fetch(`${API}/videos`).then(r => r.json());
+    if (!videos.length) { container.innerHTML = '<div class="empty-state">No videos planned</div>'; return; }
+    container.innerHTML = videos.map(v => `
+      <div class="list-item">
+        <div>
+          <div>${v.title}</div>
+          <div class="text-sm text-gray-400">${v.duration_estimate ? v.duration_estimate + ' min' : 'No duration set'}</div>
+        </div>
+        <span class="badge badge-${v.status === 'published' ? 'green' : v.status === 'edited' ? 'blue' : 'yellow'}">${v.status}</span>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// Podcasts
+async function loadPodcasts() {
+  const container = document.getElementById('podcasts-list');
+  try {
+    const podcasts = await fetch(`${API}/podcasts`).then(r => r.json());
+    if (!podcasts.length) { container.innerHTML = '<div class="empty-state">No episodes planned</div>'; return; }
+    container.innerHTML = podcasts.map(p => `
+      <div class="list-item">
+        <div>
+          <div>${p.episode_number ? `#${p.episode_number}: ` : ''}${p.title}</div>
+          <div class="text-sm text-gray-400">${p.guest ? `Guest: ${p.guest}` : 'No guest'}</div>
+        </div>
+        <span class="badge badge-${p.status === 'published' ? 'green' : 'yellow'}">${p.status}</span>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// Publications
+async function loadPublications() {
+  const container = document.getElementById('publications-list');
+  try {
+    const pubs = await fetch(`${API}/publications`).then(r => r.json());
+    if (!pubs.length) { container.innerHTML = '<div class="empty-state">No publications</div>'; return; }
+    container.innerHTML = pubs.map(p => `
+      <div class="list-item">
+        <div>
+          <div>${p.title}</div>
+          <div class="text-sm text-gray-400">${p.authors || 'No authors'} • ${p.venue}</div>
+        </div>
+        <span class="badge badge-${p.status === 'published' ? 'green' : p.status === 'accepted' ? 'blue' : 'yellow'}">${p.status}</span>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// CV
+async function loadCV() {
+  const container = document.getElementById('cv-list');
+  try {
+    const entries = await fetch(`${API}/cv`).then(r => r.json());
+    if (!entries.length) { container.innerHTML = '<div class="empty-state">No CV entries</div>'; return; }
+    container.innerHTML = entries.map(e => `
+      <div class="list-item">
+        <div>
+          <div>${e.title}</div>
+          <div class="text-sm text-gray-400">${e.organization || 'No organization'} ${e.start_date ? `• ${e.start_date} - ${e.end_date || 'present'}` : ''}</div>
+        </div>
+        <span class="badge badge-purple">${e.entry_type}</span>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// Notes
+async function loadNotes() {
+  const container = document.getElementById('notes-list');
+  try {
+    const notes = await fetch(`${API}/notes`).then(r => r.json());
+    if (!notes.length) { container.innerHTML = '<div class="empty-state">No notes</div>'; return; }
+    container.innerHTML = notes.map(n => `
+      <div class="list-item">
+        <div>
+          <div>${n.title}</div>
+          <div class="text-sm text-gray-400">${n.tags || 'No tags'}</div>
+        </div>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// PDFs
+async function loadPDFs() {
+  const container = document.getElementById('pdfs-list');
+  try {
+    const pdfs = await fetch(`${API}/pdfs`).then(r => r.json());
+    if (!pdfs.length) { container.innerHTML = '<div class="empty-state">No PDFs indexed</div>'; return; }
+    container.innerHTML = pdfs.map(p => `
+      <div class="list-item">
+        <div>
+          <div>${p.title}</div>
+          <div class="text-sm text-gray-400">${p.authors || 'Unknown author'} • ${p.page_count || '?'} pages</div>
+        </div>
+        <span class="badge badge-gray">${p.category}</span>
+      </div>
+    `).join('');
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
+}
+
+// Portfolio
+async function loadPortfolio() {
+  const summary = document.getElementById('portfolio-summary');
+  const holdings = document.getElementById('portfolio-holdings');
+  try {
+    const data = await fetch(`${API}/portfolio`).then(r => r.json());
+    const sign = data.gain_loss >= 0 ? '+' : '';
+    summary.innerHTML = `
+      <div class="stat-card">
+        <div class="stat-value">${data.holdings_count}</div>
+        <div class="stat-label">Holdings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$${data.total_cost.toFixed(2)}</div>
+        <div class="stat-label">Total Cost</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">$${data.total_value.toFixed(2)}</div>
+        <div class="stat-label">Current Value</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value ${data.gain_loss >= 0 ? 'text-green-400' : 'text-red-400'}">${sign}$${data.gain_loss.toFixed(2)}</div>
+        <div class="stat-label">Gain/Loss (${sign}${data.gain_loss_percent.toFixed(1)}%)</div>
+      </div>
+    `;
+    if (!data.holdings?.length) {
+      holdings.innerHTML = '<div class="empty-state">No holdings</div>';
+    } else {
+      holdings.innerHTML = data.holdings.map(h => `
+        <div class="list-item">
+          <div>
+            <div class="font-medium">${h.symbol}</div>
+            <div class="text-sm text-gray-400">${h.shares} shares @ $${h.cost_basis?.toFixed(2) || '?'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    summary.innerHTML = '<div class="stat-card text-red-400">Failed to load</div>';
+    holdings.innerHTML = '';
   }
 }
 
@@ -106,102 +407,39 @@ async function toggleTask(taskId) {
 async function loadEvents() {
   const container = document.getElementById('events-list');
   try {
-    const response = await fetch(`${API_BASE}/events`);
-    const events = await response.json();
-
-    if (events.length === 0) {
-      container.innerHTML = '<div class="empty-state">No events recorded yet.</div>';
-      return;
-    }
-
-    container.innerHTML = events.map(event => `
-      <div class="event-item" onclick="showEventPayload(${JSON.stringify(event).replace(/"/g, '&quot;')})">
-        <div class="flex justify-between items-center">
-          <span class="font-medium text-atlas-primary">${event.event_type}</span>
-          <span class="text-sm text-gray-500">${event.timestamp}</span>
+    const events = await fetch(`${API}/events?limit=50`).then(r => r.json());
+    if (!events.length) { container.innerHTML = '<div class="empty-state">No events recorded</div>'; return; }
+    container.innerHTML = events.map(e => `
+      <div class="list-item text-sm">
+        <div>
+          <div class="font-medium text-blue-400">${e.event_type}</div>
+          <div class="text-gray-400">${e.entity_type} #${e.entity_id}</div>
         </div>
-        <div class="text-sm text-gray-600 mt-1">
-          ${event.entity_type} #${event.entity_id}
-        </div>
+        <div class="text-xs text-gray-500">${e.timestamp?.slice(0, 19) || ''}</div>
       </div>
     `).join('');
-  } catch (error) {
-    container.innerHTML = '<div class="empty-state text-red-500">Failed to load events.</div>';
-    console.error('Failed to load events:', error);
-  }
+  } catch (e) { container.innerHTML = '<div class="empty-state text-red-400">Failed to load</div>'; }
 }
 
-function showEventPayload(event) {
-  const payloadEl = document.getElementById('event-payload');
-  payloadEl.textContent = JSON.stringify(event.payload, null, 2);
+// Task form
+document.getElementById('add-task-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const title = document.getElementById('task-title').value.trim();
+  const priority = document.getElementById('task-priority').value;
+  if (!title) return;
 
-  document.querySelectorAll('.event-item').forEach(el => el.classList.remove('selected'));
-  event.target?.closest('.event-item')?.classList.add('selected');
-}
-
-// Goals
-async function loadGoals() {
-  const container = document.getElementById('goals-list');
-  try {
-    const response = await fetch(`${API_BASE}/goals`);
-    const goals = await response.json();
-
-    if (goals.length === 0) {
-      container.innerHTML = '<div class="empty-state">No goals defined yet.</div>';
-      return;
-    }
-
-    container.innerHTML = goals.map(goal => `
-      <div class="p-4 border rounded-lg mb-3">
-        <div class="font-medium">${goal.title}</div>
-        <div class="text-sm text-gray-500 mt-1">Target: ${goal.target_date || 'Not set'}</div>
-        <div class="mt-2 bg-gray-200 rounded-full h-2">
-          <div class="bg-atlas-secondary h-2 rounded-full" style="width: ${goal.progress || 0}%"></div>
-        </div>
-      </div>
-    `).join('');
-  } catch (error) {
-    container.innerHTML = '<div class="empty-state text-red-500">Failed to load goals.</div>';
-    console.error('Failed to load goals:', error);
-  }
-}
-
-// Notes
-async function loadNotes() {
-  const container = document.getElementById('notes-list');
-  try {
-    const response = await fetch(`${API_BASE}/notes`);
-    const notes = await response.json();
-
-    if (notes.length === 0) {
-      container.innerHTML = '<div class="empty-state">No notes yet.</div>';
-      return;
-    }
-
-    container.innerHTML = notes.map(note => `
-      <div class="p-4 border rounded-lg mb-3">
-        <div class="font-medium">${note.title}</div>
-        <div class="text-sm text-gray-500 mt-1">${note.tags || 'No tags'}</div>
-      </div>
-    `).join('');
-  } catch (error) {
-    container.innerHTML = '<div class="empty-state text-red-500">Failed to load notes.</div>';
-    console.error('Failed to load notes:', error);
-  }
-}
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-  initTabs();
-
-  // Form handlers
-  document.getElementById('add-task-form').addEventListener('submit', addTask);
-  document.getElementById('refresh-events')?.addEventListener('click', loadEvents);
-
-  // Load initial data
+  await fetch(`${API}/tasks?title=${encodeURIComponent(title)}&priority=${priority}`, { method: 'POST' });
+  document.getElementById('task-title').value = '';
   loadTasks();
 });
 
-// Expose functions globally for inline handlers
-window.toggleTask = toggleTask;
-window.showEventPayload = showEventPayload;
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+  initNavigation();
+  loadDashboard();
+});
+
+// Global
+window.completeTask = completeTask;
+window.completeHabit = completeHabit;
+window.navigateTo = navigateTo;

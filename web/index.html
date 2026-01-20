@@ -6,98 +6,196 @@
   <title>Atlas Personal OS</title>
   <link rel="stylesheet" href="/src/styles.css">
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <div id="app">
-    <!-- Header -->
-    <header class="bg-atlas-dark text-white shadow-lg">
-      <div class="container mx-auto px-4 py-4">
-        <h1 class="text-2xl font-bold">Atlas Personal OS</h1>
-        <p class="text-gray-300 text-sm">Local-first productivity system</p>
+<body class="bg-gray-900 min-h-screen text-gray-100">
+  <div id="app" class="flex min-h-screen">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gray-800 border-r border-gray-700 flex flex-col">
+      <div class="p-4 border-b border-gray-700">
+        <h1 class="text-xl font-bold text-blue-400">Atlas OS</h1>
+        <p class="text-xs text-gray-500">Personal Automation System</p>
       </div>
-    </header>
 
-    <!-- Navigation -->
-    <nav class="bg-white border-b shadow-sm">
-      <div class="container mx-auto px-4">
-        <div class="flex space-x-4" id="nav-tabs">
-          <button class="nav-tab active" data-tab="tasks">Tasks</button>
-          <button class="nav-tab" data-tab="audit">Audit</button>
-          <button class="nav-tab" data-tab="goals">Goals</button>
-          <button class="nav-tab" data-tab="notes">Notes</button>
+      <nav class="flex-1 p-2 space-y-1">
+        <button class="nav-item active" data-section="dashboard">
+          <span class="icon">📊</span> Dashboard
+        </button>
+
+        <div class="nav-group">
+          <div class="nav-group-label">Life</div>
+          <button class="nav-item" data-section="tasks"><span class="icon">✓</span> Tasks</button>
+          <button class="nav-item" data-section="goals"><span class="icon">🎯</span> Goals</button>
+          <button class="nav-item" data-section="habits"><span class="icon">📅</span> Habits</button>
+          <button class="nav-item" data-section="reminders"><span class="icon">⏰</span> Reminders</button>
+          <button class="nav-item" data-section="contacts"><span class="icon">👤</span> Contacts</button>
         </div>
+
+        <div class="nav-group">
+          <div class="nav-group-label">Content</div>
+          <button class="nav-item" data-section="ideas"><span class="icon">💡</span> Ideas</button>
+          <button class="nav-item" data-section="videos"><span class="icon">🎬</span> Videos</button>
+          <button class="nav-item" data-section="podcasts"><span class="icon">🎙️</span> Podcasts</button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-label">Career</div>
+          <button class="nav-item" data-section="publications"><span class="icon">📄</span> Publications</button>
+          <button class="nav-item" data-section="cv"><span class="icon">📋</span> CV/Resume</button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-label">Knowledge</div>
+          <button class="nav-item" data-section="notes"><span class="icon">📝</span> Notes</button>
+          <button class="nav-item" data-section="pdfs"><span class="icon">📚</span> PDFs</button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-label">Finance</div>
+          <button class="nav-item" data-section="portfolio"><span class="icon">💰</span> Portfolio</button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-label">System</div>
+          <button class="nav-item" data-section="events"><span class="icon">📜</span> Audit Log</button>
+        </div>
+      </nav>
+
+      <div class="p-4 border-t border-gray-700 text-xs text-gray-500">
+        v2.0.0 • 22 Modules
       </div>
-    </nav>
+    </aside>
 
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-6">
-      <!-- Tasks Tab -->
-      <section id="tasks-tab" class="tab-content active">
-        <div class="bg-white rounded-lg shadow p-6 mb-6">
-          <h2 class="text-lg font-semibold mb-4">Add Task</h2>
-          <form id="add-task-form" class="flex flex-wrap gap-4">
-            <input type="text" id="task-title" placeholder="Task title"
-                   class="flex-1 min-w-64 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-atlas-primary">
-            <select id="task-priority" class="px-3 py-2 border rounded-lg">
-              <option value="MEDIUM">Medium</option>
+    <main class="flex-1 overflow-auto">
+      <!-- Dashboard -->
+      <section id="dashboard-section" class="section active p-6">
+        <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
+        <div id="dashboard-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div class="stat-card">Loading...</div>
+        </div>
+      </section>
+
+      <!-- Tasks -->
+      <section id="tasks-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Tasks</h2>
+        <div class="card mb-4">
+          <form id="add-task-form" class="flex gap-2">
+            <input type="text" id="task-title" placeholder="New task..." class="input flex-1">
+            <select id="task-priority" class="input w-32">
               <option value="LOW">Low</option>
+              <option value="MEDIUM" selected>Medium</option>
               <option value="HIGH">High</option>
               <option value="URGENT">Urgent</option>
             </select>
-            <input type="text" id="task-category" placeholder="Category"
-                   class="px-3 py-2 border rounded-lg">
-            <button type="submit"
-                    class="px-4 py-2 bg-atlas-primary text-white rounded-lg hover:bg-blue-600 transition">
-              Add Task
-            </button>
+            <button type="submit" class="btn-primary">Add</button>
           </form>
         </div>
-
-        <div class="bg-white rounded-lg shadow">
-          <div class="p-4 border-b">
-            <h2 class="text-lg font-semibold">Tasks</h2>
-          </div>
-          <div id="tasks-list" class="divide-y">
-            <div class="p-4 text-gray-500">Loading tasks...</div>
-          </div>
+        <div class="card">
+          <div id="tasks-list" class="divide-y divide-gray-700"></div>
         </div>
       </section>
 
-      <!-- Audit Tab -->
-      <section id="audit-tab" class="tab-content hidden">
-        <div class="bg-white rounded-lg shadow">
-          <div class="p-4 border-b flex justify-between items-center">
-            <h2 class="text-lg font-semibold">Event Log</h2>
-            <button id="refresh-events" class="text-atlas-primary hover:underline">Refresh</button>
-          </div>
-          <div id="events-list" class="divide-y">
-            <div class="p-4 text-gray-500">Loading events...</div>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg shadow mt-6 p-4">
-          <h3 class="font-semibold mb-2">Event Payload</h3>
-          <pre id="event-payload" class="bg-gray-100 p-4 rounded-lg text-sm overflow-auto max-h-48">
-            Select an event to view payload
-          </pre>
+      <!-- Goals -->
+      <section id="goals-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Goals</h2>
+        <div class="card">
+          <div id="goals-list" class="space-y-4 p-4"></div>
         </div>
       </section>
 
-      <!-- Goals Tab -->
-      <section id="goals-tab" class="tab-content hidden">
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold mb-4">Goals</h2>
-          <div id="goals-list">
-            <div class="text-gray-500">Loading goals...</div>
-          </div>
+      <!-- Habits -->
+      <section id="habits-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Today's Habits</h2>
+        <div class="card">
+          <div id="habits-list" class="divide-y divide-gray-700"></div>
         </div>
       </section>
 
-      <!-- Notes Tab -->
-      <section id="notes-tab" class="tab-content hidden">
-        <div class="bg-white rounded-lg shadow p-6">
-          <h2 class="text-lg font-semibold mb-4">Notes</h2>
-          <div id="notes-list">
-            <div class="text-gray-500">Loading notes...</div>
-          </div>
+      <!-- Reminders -->
+      <section id="reminders-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Upcoming Reminders</h2>
+        <div class="card">
+          <div id="reminders-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- Contacts -->
+      <section id="contacts-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Contacts</h2>
+        <div class="card">
+          <div id="contacts-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- Ideas -->
+      <section id="ideas-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Content Ideas</h2>
+        <div class="card">
+          <div id="ideas-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- Videos -->
+      <section id="videos-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">YouTube Videos</h2>
+        <div class="card">
+          <div id="videos-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- Podcasts -->
+      <section id="podcasts-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Podcast Episodes</h2>
+        <div class="card">
+          <div id="podcasts-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- Publications -->
+      <section id="publications-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Publications</h2>
+        <div class="card">
+          <div id="publications-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- CV -->
+      <section id="cv-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">CV / Resume</h2>
+        <div class="card">
+          <div id="cv-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- Notes -->
+      <section id="notes-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Notes</h2>
+        <div class="card">
+          <div id="notes-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- PDFs -->
+      <section id="pdfs-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">PDF Library</h2>
+        <div class="card">
+          <div id="pdfs-list" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- Portfolio -->
+      <section id="portfolio-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Portfolio</h2>
+        <div id="portfolio-summary" class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"></div>
+        <div class="card">
+          <div id="portfolio-holdings" class="divide-y divide-gray-700"></div>
+        </div>
+      </section>
+
+      <!-- Events -->
+      <section id="events-section" class="section p-6">
+        <h2 class="text-2xl font-bold mb-6">Audit Log</h2>
+        <div class="card">
+          <div id="events-list" class="divide-y divide-gray-700 max-h-96 overflow-y-auto"></div>
         </div>
       </section>
     </main>
