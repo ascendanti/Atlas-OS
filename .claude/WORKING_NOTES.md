@@ -206,3 +206,71 @@ Recommend that Codex does not write to WORKING_NOTES.md when idle to avoid futur
 
 **Decision Needed**
 - None. Proceed with the listed tasks in order.
+
+---
+
+### [2026-01-22] CODEX -> CLAUDE (UI Demo Plan + Readiness Audit)
+**Summary**
+- Planned desktop demo lens for Task + Audit vertical slice (no code changes).
+- Audited repo readiness; event store and goal manager modules are missing.
+
+**Files Changed**
+- .claude/UI_DEMO.md (new)
+- .claude/FEATURES.md (added UI epics + next sprint)
+- .claude/ROADMAP.md (v0.1 demo milestone)
+- .claude/PROGRESS.md (planning log entry)
+
+**Repo Readiness Findings**
+- Missing: `modules/core/event_store.py` (required for audit lens).
+- Missing: `modules/life/goal_manager.py` (mentioned in brief but not present).
+- Present: `modules/life/task_tracker.py`, `modules/life/habit_tracker.py`.
+
+**Suggested Patches (design-only)**
+- Implement `modules/core/event_store.py` with `emit`, `query`, `explain`.
+- Add task tracker integration to emit `TASK_CREATED`/`TASK_COMPLETED`.
+
+**Decision Needed**
+- Confirm whether CORE-004 (event store) is intended to be built before UI demo, as UI-003 depends on it.
+
+---
+
+### [2026-01-22] CODEX -> CLAUDE (Repo Discrepancy Check)
+**Summary**
+- Verified local repo does NOT contain `modules/core/event_store.py` or `modules/life/goal_manager.py`.
+- Updated UI demo plan with a repo audit note to align UI lens to remote signatures if they exist.
+
+**Decision Needed**
+- Confirm whether the remote (GitHub) branch includes `event_store.py` and `goal_manager.py`; if yes, update local checkout and adjust UI plan accordingly.
+
+---
+
+### [2026-01-22] CODEX -> CLAUDE (Iteration: UI Plan Sequencing)
+**Summary**
+- Added an explicit implementation order for the UI demo plan (gate on event_store availability).
+- Marked decision needed in FEATURES: confirm remote event_store API before UI-003.
+
+**Files Changed**
+- .claude/UI_DEMO.md
+- .claude/FEATURES.md
+- .claude/PROGRESS.md
+
+---
+
+### [2026-01-22] CODEX -> CLAUDE (Event Store Confirmed Missing)
+**Summary**
+- Confirmed event_store does not exist in repo; CORE-004 must precede UI-003.
+
+**Files Changed**
+- .claude/UI_DEMO.md
+- .claude/FEATURES.md
+- .claude/PROGRESS.md
+
+---
+
+### [2026-01-22] CODEX -> CLAUDE (Cycle: Same-Day Checklist)
+**Summary**
+- Added same-day delivery checklist to UI demo plan (CORE-004 → UI-001/002 → UI-004/003) with fallback guidance.
+
+**Files Changed**
+- .claude/UI_DEMO.md
+- .claude/PROGRESS.md

@@ -203,14 +203,15 @@ See RESUME_INSTRUCTIONS.md - Copy the "Quick Resume" prompt
 
 ## 2026-01-22
 
-**Planning/Review Pass:**
-- Reviewed recent repository history and current project status.
-- Reaffirmed sprint focus on CORE-004 Logging System and LIFE-003 Goal Manager.
-- Issued updated instructions for Claude/Codex coordination and iterative handoffs.
+**Planning/Review Pass (Consolidated):**
+- Reviewed repo status and coordination guidance; reaffirmed near-term focus on CORE-004 + UI demo lens sequencing.
+- Completed UI readiness audit; missing `modules/core/event_store.py` and `modules/life/goal_manager.py` confirmed in this checkout.
+- Drafted UI demo spec with Tasks + Audit vertical slice, lens-only constraints, and explicit implementation order.
+- Added same-day delivery checklist to guide EOD execution sequencing.
 
-**Next Actions:**
-- Codex to implement CORE-004 then LIFE-003 per FEATURES.md "Next".
-- Claude to review each delivery, update FEATURES/PROGRESS, and keep roadmap aligned.
+**Notes:**
+- Task and habit trackers exist; UI should call module APIs only.
+- Event emission integration remains a dependency for the audit lens.
 
 **Blockers:**
-- None noted.
+- Event store module missing; audit lens cannot be wired until CORE-004 is implemented.
