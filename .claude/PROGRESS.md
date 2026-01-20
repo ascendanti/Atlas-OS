@@ -593,3 +593,60 @@ python main.py pdf explain 1
 - CON-002 Podcast Episode Scheduler
 - CAR-002 CV/Resume Manager
 - KNOW-003 Research Tracker
+
+---
+
+## 2026-01-20 (continued)
+
+**CON-002 Podcast Episode Scheduler Implementation**
+
+**Feature:** CON-002 Podcast Episode Scheduler (Event-sourced)
+**Status:** Complete
+
+**Implementation:**
+- ✅ Created `modules/content/podcast_scheduler.py` (198 lines)
+- ✅ Events: EPISODE_PLANNED, EPISODE_UPDATED, EPISODE_OUTLINED, EPISODE_RECORDED, EPISODE_EDITED, EPISODE_PUBLISHED
+- ✅ Status workflow: planned → outlined → recorded → edited → published
+- ✅ Guest tracking, episode numbering, idea linking
+- ✅ 23 unit tests in test_podcast_scheduler.py (all passing)
+
+**CLI Commands Added:**
+- `podcast plan <title>` - Plan a new episode
+- `podcast list` - List episodes (filter by status/guest)
+- `podcast show <id>` - Show episode details
+- `podcast outline <id>` - Mark outline completed
+- `podcast record <id>` - Mark as recorded
+- `podcast edit <id>` - Mark as edited
+- `podcast publish <id>` - Mark as published
+- `podcast explain <id>` - Audit trail
+
+**Test Results:**
+- 264 tests passing (241 previous + 23 new)
+
+**Invariant Audit:**
+- Parallel mutable truth? NO - events table is canonical
+- Events canonical? YES - PodcastScheduler projects state from events only
+- Entity without event? NO - All episodes emit EPISODE_PLANNED on creation
+
+**How to Run:**
+```bash
+python main.py podcast plan "Interview with Expert" -g "Dr. Smith" -t 60
+python main.py podcast list
+python main.py podcast outline 1
+python main.py podcast record 1
+python main.py podcast edit 1
+python main.py podcast publish 1 --url "https://podcast.com/ep1.mp3"
+python main.py podcast explain 1
+```
+
+**Files Changed:**
+- `modules/content/podcast_scheduler.py` (NEW)
+- `modules/content/__init__.py` (modified)
+- `tests/test_podcast_scheduler.py` (NEW)
+- `main.py` (modified - added podcast CLI commands)
+- `.claude/FEATURES.md` (modified)
+
+**Next Steps:**
+- CAR-002 CV/Resume Manager
+- KNOW-003 Research Tracker
+- LIFE-004 Event Reminder System

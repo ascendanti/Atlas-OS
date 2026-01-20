@@ -26,9 +26,9 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- CON-002 Podcast Episode Scheduler (Event-sourced)
 - CAR-002 CV/Resume Manager
 - KNOW-003 Research Tracker
+- LIFE-004 Event Reminder System
 
 ## Acceptance Criteria
 
@@ -105,6 +105,15 @@
 - Unit tests for CRUD + search
 - Works 100% offline, <200 lines
 
+### CON-002 Podcast Episode Scheduler (Event-sourced)
+- Events: EPISODE_PLANNED, EPISODE_UPDATED, EPISODE_OUTLINED, EPISODE_RECORDED, EPISODE_EDITED, EPISODE_PUBLISHED
+- Episode fields: title, description, guest, episode_number, duration_estimate, tags, status, recording_date, publish_date, audio_url
+- Status workflow: planned → outlined → recorded → edited → published
+- CLI: `podcast plan <title>`, `podcast list`, `podcast show <id>`, `podcast outline <id>`, `podcast record <id>`, `podcast edit <id>`, `podcast publish <id>`, `podcast explain <id>`
+- Links to existing ideas from idea_bank (optional)
+- Unit tests for workflow transitions
+- Works 100% offline, <200 lines
+
 ### CON-004 Content Idea Bank (Event-sourced)
 - Events: IDEA_CREATED, IDEA_UPDATED, IDEA_STATUS_CHANGED, IDEA_PRIORITIZED
 - Idea fields: title, description, platform (youtube/podcast/blog/social), status (draft/planned/in_progress/published/archived), priority
@@ -137,6 +146,7 @@
 - CON-001 YouTube Video Planner ✓ (2026-01-20)
 - CAR-001 Publication Tracker ✓ (2026-01-20)
 - KNOW-001 PDF Library Indexer ✓ (2026-01-20)
+- CON-002 Podcast Episode Scheduler ✓ (2026-01-20)
 
 ## Proceed vs Blocked
 - Proceed: UI-001, UI-002, UI-003, UI-004, UI-005, CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
@@ -220,9 +230,9 @@
 ## Feature Completion Tracking
 
 **Total Features:** 33
-**Complete:** 18
+**Complete:** 19
 **In Progress:** 0
-**Planned:** 15
+**Planned:** 14
 
 **Completed Features:**
 - SPRINT-0000: Dual-agent coordination protocol + WORKING_NOTES.md
@@ -243,8 +253,9 @@
 - CON-001: YouTube Video Planner (Event-sourced)
 - CAR-001: Publication Tracker (Event-sourced)
 - KNOW-001: PDF Library Indexer (Event-sourced)
+- CON-002: Podcast Episode Scheduler (Event-sourced)
 
-**Next Sprint:** Desktop Demo (Tasks + Audit)
+**Next Sprint:** CAR-002 CV Manager, KNOW-003 Research Tracker, LIFE-004 Event Reminder
 
 ## Decision Needed
 - None (event_store confirmed missing; implement CORE-004 before UI-003).

@@ -1407,6 +1407,182 @@ def video_explain(video_id):
 
 
 # ============================================================================
+# PODCAST COMMANDS (CON-002)
+# ============================================================================
+
+@cli.group()
+def podcast():
+    """Podcast episode scheduling (Event-sourced)"""
+    pass
+
+
+@podcast.command("plan")
+@click.argument("title")
+@click.option("--description", "-d", default="", help="Episode description")
+@click.option("--guest", "-g", default="", help="Guest name")
+@click.option("--episode", "-e", type=int, help="Episode number")
+@click.option("--idea", "-i", type=int, help="Link to idea ID")
+@click.option("--duration", "-t", type=int, help="Estimated duration in minutes")
+@click.option("--tags", default="", help="Comma-separated tags")
+def podcast_plan(title, description, guest, episode, idea, duration, tags):
+    """Plan a new podcast episode"""
+    from modules.content.podcast_scheduler import PodcastScheduler
+
+    scheduler = PodcastScheduler()
+    episode_id = scheduler.plan(
+        title=title,
+        description=description,
+        guest=guest,
+        episode_number=episode,
+        idea_id=idea,
+        duration_estimate=duration,
+        tags=tags
+    )
+    click.echo(f"Episode planned with ID: {episode_id}")
+
+
+@podcast.command("list")
+@click.option("--status", "-s", type=click.Choice(["planned", "outlined", "recorded", "edited", "published"]))
+@click.option("--guest", "-g", default=None, help="Filter by guest name")
+def podcast_list(status, guest):
+    """List all podcast episodes"""
+    from modules.content.podcast_scheduler import PodcastScheduler, EpisodeStatus
+
+    scheduler = PodcastScheduler()
+    status_filter = EpisodeStatus(status) if status else None
+    episodes = scheduler.list_episodes(status=status_filter, guest=guest)
+
+    if not episodes:
+        click.echo("No episodes found.")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Ep#':<5} {'Status':<10} {'Guest':<15} {'Title'}")
+    click.echo("-" * 70)
+
+    for ep in episodes:
+        ep_num = str(ep['episode_number']) if ep['episode_number'] else "-"
+        guest_name = ep['guest'][:14] + "..." if len(ep['guest']) > 14 else ep['guest'] or "-"
+        title = ep['title'][:25] + "..." if len(ep['title']) > 25 else ep['title']
+        click.echo(f"{ep['id']:<4} {ep_num:<5} {ep['status']:<10} {guest_name:<15} {title}")
+
+    click.echo(f"\nTotal: {len(episodes)} episode(s)")
+
+
+@podcast.command("show")
+@click.argument("episode_id", type=int)
+def podcast_show(episode_id):
+    """Show episode details"""
+    from modules.content.podcast_scheduler import PodcastScheduler
+
+    scheduler = PodcastScheduler()
+    episode = scheduler.get(episode_id)
+
+    if not episode:
+        click.echo(f"Episode {episode_id} not found.")
+        return
+
+    click.echo(f"\nEpisode #{episode['id']}")
+    click.echo(f"Title: {episode['title']}")
+    click.echo(f"Episode Number: {episode['episode_number'] or '-'}")
+    click.echo(f"Status: {episode['status']}")
+    click.echo(f"Guest: {episode['guest'] or '-'}")
+    click.echo(f"Description: {episode['description'] or '-'}")
+    click.echo(f"Duration: {episode['duration_estimate'] or '-'} minutes")
+    click.echo(f"Tags: {episode['tags'] or '-'}")
+    if episode['idea_id']:
+        click.echo(f"Linked Idea: #{episode['idea_id']}")
+    if episode['outlined_at']:
+        click.echo(f"Outlined: {episode['outlined_at']}")
+    if episode['recorded_at']:
+        click.echo(f"Recorded: {episode['recorded_at']}")
+    if episode['edited_at']:
+        click.echo(f"Edited: {episode['edited_at']}")
+    if episode['published_at']:
+        click.echo(f"Published: {episode['published_at']}")
+        click.echo(f"Audio URL: {episode['audio_url'] or '-'}")
+
+
+@podcast.command("outline")
+@click.argument("episode_id", type=int)
+def podcast_outline(episode_id):
+    """Mark episode outline as completed"""
+    from modules.content.podcast_scheduler import PodcastScheduler
+
+    scheduler = PodcastScheduler()
+    if scheduler.mark_outlined(episode_id):
+        click.echo(f"Episode {episode_id} marked as outlined.")
+    else:
+        click.echo(f"Cannot mark episode {episode_id} as outlined. Check status.")
+
+
+@podcast.command("record")
+@click.argument("episode_id", type=int)
+def podcast_record(episode_id):
+    """Mark episode as recorded"""
+    from modules.content.podcast_scheduler import PodcastScheduler
+
+    scheduler = PodcastScheduler()
+    if scheduler.mark_recorded(episode_id):
+        click.echo(f"Episode {episode_id} marked as recorded.")
+    else:
+        click.echo(f"Cannot mark episode {episode_id} as recorded. Check status.")
+
+
+@podcast.command("edit")
+@click.argument("episode_id", type=int)
+def podcast_edit(episode_id):
+    """Mark episode as edited"""
+    from modules.content.podcast_scheduler import PodcastScheduler
+
+    scheduler = PodcastScheduler()
+    if scheduler.mark_edited(episode_id):
+        click.echo(f"Episode {episode_id} marked as edited.")
+    else:
+        click.echo(f"Cannot mark episode {episode_id} as edited. Check status.")
+
+
+@podcast.command("publish")
+@click.argument("episode_id", type=int)
+@click.option("--url", "-u", default="", help="Audio URL")
+def podcast_publish(episode_id, url):
+    """Mark episode as published"""
+    from modules.content.podcast_scheduler import PodcastScheduler
+
+    scheduler = PodcastScheduler()
+    if scheduler.mark_published(episode_id, audio_url=url):
+        click.echo(f"Episode {episode_id} marked as published.")
+    else:
+        click.echo(f"Cannot mark episode {episode_id} as published. Check status.")
+
+
+@podcast.command("explain")
+@click.argument("episode_id", type=int)
+def podcast_explain(episode_id):
+    """Show episode event history (audit trail)"""
+    from modules.content.podcast_scheduler import PodcastScheduler
+    import json
+
+    scheduler = PodcastScheduler()
+    events = scheduler.explain(episode_id)
+
+    if not events:
+        click.echo(f"No events found for episode {episode_id}.")
+        return
+
+    click.echo(f"\nEvent history for episode #{episode_id}:")
+    click.echo("-" * 60)
+
+    for event in events:
+        payload = event['payload']
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        click.echo(f"\n[{event['timestamp']}] {event['event_type']}")
+        for k, v in payload.items():
+            if v is not None:
+                click.echo(f"  {k}: {v}")
+
+
+# ============================================================================
 # PDF COMMANDS (KNOW-001)
 # ============================================================================
 
