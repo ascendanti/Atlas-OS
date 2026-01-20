@@ -48,6 +48,10 @@ Tabs (Notebook UI):
 - `modules.core.event_store.EventStore.query(...)`
 - `modules.core.event_store.EventStore.explain(entity_type, entity_id)`
 
+**Repository audit note:**
+- Confirmed: `modules/core/event_store.py` is missing in the repo.
+- Implement CORE-004 before UI-003 (Audit lens) and align event signatures to the event store once created.
+
 **Event emission contract (for integration proof):**
 - On task creation: emit `TASK_CREATED` with payload `{task_id, title, priority, due_date}`.
 - On task completion: emit `TASK_COMPLETED` with payload `{task_id, completed_at}`.
@@ -57,6 +61,14 @@ Tabs (Notebook UI):
 - Can complete a task via UI and see status update.
 - Audit tab shows both events with correct payloads and timestamps.
 - UI does not write SQL or maintain parallel state.
+
+## Implementation Order (Lens-First, Event-Backed)
+0) **Repo sync + API validation**: confirm `event_store` and `goal_manager` signatures (local vs. GitHub).
+1) **CORE-004**: implement event store if missing (required for Audit lens).
+2) **UI-001**: Tkinter shell with tabs (Tasks + Audit wired later).
+3) **UI-002**: Tasks lens wired to TaskTracker add/list/complete.
+4) **UI-004**: emit task events on add/complete (or align with existing event store).
+5) **UI-003**: Audit lens consumes event stream + explain.
 
 ## Constraints
 - UI is **lens-only** (no new truth stores).

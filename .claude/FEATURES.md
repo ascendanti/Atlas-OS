@@ -141,4 +141,5 @@
 **Next Sprint:** Desktop Demo (Tasks + Audit)
 
 ## Decision Needed
+- None (event_store confirmed missing; implement CORE-004 before UI-003).
 - None (defaulting to Tkinter for demo lens)
