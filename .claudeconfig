@@ -1,0 +1,32 @@
+{
+  "auto_approve_commands": [
+    "pytest",
+    "python",
+    "python3",
+    "pip",
+    "black",
+    "ruff",
+    "git",
+    "ls",
+    "cat",
+    "grep",
+    "find",
+    "mkdir",
+    "touch"
+  ],
+  "auto_approve_file_operations": true,
+  "max_autonomous_iterations": 100,
+  "allowed_directories": [
+    "/root/atlas-personal-os"
+  ],
+  "safety": {
+    "require_confirmation_for_delete": true,
+    "require_confirmation_for_system_commands": true,
+    "require_confirmation_for_network_operations": false
+  },
+  "preferences": {
+    "verbose_output": false,
+    "show_diffs": true,
+    "run_tests_after_changes": true
+  }
+}
