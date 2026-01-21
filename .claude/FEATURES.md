@@ -26,9 +26,40 @@
 - KNOW-004 Citation Manager
 
 ## Next
-- KNOW-003 Research Tracker
-- CAR-003 Job Application Tracker
-- CON-003 Social Media Calendar
+- FIN-003 Budget Analyzer
+- FIN-004 Expense Categorizer
+- CAR-004 Research Paper Monitor
+
+## Recently Enhanced (2026-01-20)
+### LIFE-005 Enhanced Task Tracker (GTD Edition)
+- Subtasks with parent_id hierarchy
+- Multiple tags (JSON array)
+- Time tracking (estimated/actual minutes, log_time)
+- Task dependencies (blocked_by)
+- Recurring tasks (daily/weekly/monthly/yearly)
+- GTD views: today, upcoming, someday, overdue, blocked
+- Context and energy level filtering
+- Goal linkage
+
+### LIFE-006 Enhanced Goal Manager (OKR Edition)
+- Areas of life (health, career, finance, relationships, etc.)
+- Key Results (OKR-style measurable metrics)
+- Milestones with completion tracking
+- Goal hierarchy (parent/child goals)
+- Progress history with reflections
+
+### LIFE-007 Weekly Review System
+- Generate weekly/monthly/quarterly reviews
+- Aggregate metrics from tasks, goals, habits
+- Reflection prompts (GTD-style)
+- Review persistence and history
+- Trend analysis across reviews
+
+### API-002 Enhanced Web API v2.1
+- 50+ new endpoints for GTD and OKR features
+- Task GTD views: /api/tasks/today, /api/tasks/upcoming, etc.
+- Goal OKR: /api/goals/{id}/key-results, /api/goals/{id}/milestones
+- Weekly reviews: /api/reviews/generate, /api/reviews/trends
 
 ## Acceptance Criteria
 
@@ -155,6 +186,13 @@
 - KNOW-001 PDF Library Indexer ✓ (2026-01-20)
 - CON-002 Podcast Episode Scheduler ✓ (2026-01-20)
 - CAR-002 CV/Resume Manager ✓ (2026-01-20)
+- LIFE-005 Enhanced Task Tracker (GTD Edition) ✓ (2026-01-20)
+- LIFE-006 Enhanced Goal Manager (OKR Edition) ✓ (2026-01-20)
+- LIFE-007 Weekly Review System ✓ (2026-01-20)
+- API-002 Enhanced Web API v2.1 ✓ (2026-01-20)
+- KNOW-003 Research Tracker ✓ (2026-01-20)
+- CAR-003 Job Application Tracker ✓ (2026-01-20)
+- CON-003 Social Media Calendar ✓ (2026-01-20)
 
 ## Proceed vs Blocked
 - Proceed: UI-001, UI-002, UI-003, UI-004, UI-005, CORE-004, FIN-003, FIN-004, FIN-005, CAR-001, CAR-002, CAR-003, CAR-004, CON-001, CON-002, CON-003, CON-004, LIFE-003, LIFE-004, KNOW-001, KNOW-002, KNOW-003, KNOW-004
@@ -237,8 +275,8 @@
 
 ## Feature Completion Tracking
 
-**Total Features:** 30
-**Complete:** 22
+**Total Features:** 37
+**Complete:** 29
 **In Progress:** 0
 **Planned:** 8
 
