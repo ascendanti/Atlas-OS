@@ -10,6 +10,15 @@ from typing import Optional
 
 from modules.core.database import Database, get_database
 from modules.core.event_store import EventStore, get_event_store
+from modules.career.cv_renderer import render_markdown, render_text
+from modules.career.cv_utils import (
+    is_within_date_range,
+    matches_query,
+    normalize_date,
+    normalize_highlights,
+    normalize_tags,
+    parse_tags,
+)
 
 # Event types
 ENTRY_ADDED = "ENTRY_ADDED"
@@ -46,6 +55,11 @@ class CVManager:
         highlights: str = ""
     ) -> int:
         """Add a new CV entry. Returns entry ID."""
+        start_date = normalize_date(start_date)
+        end_date = normalize_date(end_date)
+        if start_date and end_date and end_date < start_date:
+            raise ValueError("End date cannot be before start date.")
+
         entry_id = self._get_next_id()
         payload = {
             "entry_type": entry_type.value,
@@ -54,8 +68,8 @@ class CVManager:
             "description": description,
             "start_date": start_date,
             "end_date": end_date,
-            "tags": tags,
-            "highlights": highlights,
+            "tags": normalize_tags(tags),
+            "highlights": normalize_highlights(highlights),
         }
         self.event_store.emit(ENTRY_ADDED, self.ENTITY_TYPE, entry_id, payload)
         return entry_id
@@ -66,10 +80,29 @@ class CVManager:
         if not entry or entry["archived"]:
             return False
         valid_fields = {"title", "organization", "description", "start_date",
-                        "end_date", "tags", "highlights"}
+                        "end_date", "tags", "highlights", "entry_type"}
         payload = {k: v for k, v in kwargs.items() if k in valid_fields and v is not None}
         if not payload:
             return False
+        if "entry_type" in payload:
+            entry_type = payload["entry_type"]
+            payload["entry_type"] = (
+                entry_type.value if isinstance(entry_type, EntryType) else EntryType(entry_type).value
+            )
+        if "start_date" in payload:
+            payload["start_date"] = normalize_date(payload["start_date"])
+        if "end_date" in payload:
+            payload["end_date"] = normalize_date(payload["end_date"])
+        if "tags" in payload:
+            payload["tags"] = normalize_tags(payload["tags"])
+        if "highlights" in payload:
+            payload["highlights"] = normalize_highlights(payload["highlights"])
+
+        start_date = payload.get("start_date", entry.get("start_date"))
+        end_date = payload.get("end_date", entry.get("end_date"))
+        if start_date and end_date and end_date < start_date:
+            raise ValueError("End date cannot be before start date.")
+
         self.event_store.emit(ENTRY_UPDATED, self.ENTITY_TYPE, entry_id, payload)
         return True
 
@@ -91,6 +124,10 @@ class CVManager:
     def list_entries(
         self,
         entry_type: Optional[EntryType] = None,
+        tag: Optional[str] = None,
+        query: Optional[str] = None,
+        start_after: Optional[str] = None,
+        end_before: Optional[str] = None,
         include_archived: bool = False,
         limit: int = 100
     ) -> list[dict]:
@@ -106,42 +143,24 @@ class CVManager:
                 continue
             if entry_type and entry["entry_type"] != entry_type.value:
                 continue
+            if tag and tag not in parse_tags(entry.get("tags", "")):
+                continue
+            if query and not matches_query(entry, query):
+                continue
+            if not is_within_date_range(entry, start_after, end_before):
+                continue
             results.append(entry)
         return results[:limit]
 
     def export(self, include_archived: bool = False) -> str:
         """Export formatted CV summary."""
-        entries = self.list_entries(include_archived=include_archived)
+        entries = self.list_entries(include_archived=include_archived, limit=1000)
+        return render_text(entries)
 
-        sections = {
-            "experience": ("WORK EXPERIENCE", []),
-            "education": ("EDUCATION", []),
-            "skill": ("SKILLS", []),
-            "project": ("PROJECTS", []),
-            "certification": ("CERTIFICATIONS", []),
-        }
-
-        for entry in entries:
-            etype = entry["entry_type"]
-            if etype in sections:
-                sections[etype][1].append(entry)
-
-        output = ["=" * 50, "CURRICULUM VITAE", "=" * 50, ""]
-
-        for etype, (header, items) in sections.items():
-            if items:
-                output.append(f"\n{header}")
-                output.append("-" * len(header))
-                for item in items:
-                    org = f" @ {item['organization']}" if item["organization"] else ""
-                    dates = ""
-                    if item["start_date"]:
-                        dates = f" ({item['start_date']} - {item['end_date'] or 'present'})"
-                    output.append(f"  • {item['title']}{org}{dates}")
-                    if item["description"]:
-                        output.append(f"    {item['description']}")
-
-        return "\n".join(output)
+    def export_markdown(self, include_archived: bool = False) -> str:
+        """Export markdown CV summary."""
+        entries = self.list_entries(include_archived=include_archived, limit=1000)
+        return render_markdown(entries)
 
     def explain(self, entry_id: int) -> list[dict]:
         """Get full event history for an entry."""
