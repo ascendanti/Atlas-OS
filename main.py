@@ -1239,6 +1239,226 @@ def pub_explain(pub_id):
 
 
 # ============================================================================
+# CV COMMANDS (CAR-002)
+# ============================================================================
+
+@cli.group()
+def cv():
+    """CV/resume management (Event-sourced)"""
+    pass
+
+
+@cv.command("add")
+@click.argument("entry_type", type=click.Choice(["experience", "education", "skill", "project", "certification"]))
+@click.argument("title")
+@click.option("--org", "-o", "organization", default="", help="Organization or institution")
+@click.option("--description", "-d", default="", help="Entry description")
+@click.option("--start", default="", help="Start date (YYYY-MM-DD)")
+@click.option("--end", default="", help="End date (YYYY-MM-DD)")
+@click.option("--tags", "-t", default="", help="Comma-separated tags")
+@click.option("--highlight", "-H", "highlights", multiple=True, help="Highlight (repeatable)")
+def cv_add(entry_type, title, organization, description, start, end, tags, highlights):
+    """Add a CV entry"""
+    from modules.career.cv_manager import CVManager, EntryType
+
+    manager = CVManager()
+    try:
+        entry_id = manager.add(
+            entry_type=EntryType(entry_type),
+            title=title,
+            organization=organization,
+            description=description,
+            start_date=start,
+            end_date=end,
+            tags=tags,
+            highlights=list(highlights)
+        )
+    except ValueError as exc:
+        click.echo(f"Error: {exc}")
+        return
+
+    click.echo(f"Added CV entry #{entry_id}: {title}")
+
+
+@cv.command("update")
+@click.argument("entry_id", type=int)
+@click.option("--type", "entry_type", type=click.Choice(["experience", "education", "skill", "project", "certification"]))
+@click.option("--title", default=None, help="Entry title")
+@click.option("--org", "-o", "organization", default=None, help="Organization or institution")
+@click.option("--description", "-d", default=None, help="Entry description")
+@click.option("--start", default=None, help="Start date (YYYY-MM-DD)")
+@click.option("--end", default=None, help="End date (YYYY-MM-DD)")
+@click.option("--tags", "-t", default=None, help="Comma-separated tags")
+@click.option("--highlight", "-H", "highlights", multiple=True, help="Highlight (repeatable)")
+def cv_update(entry_id, entry_type, title, organization, description, start, end, tags, highlights):
+    """Update a CV entry"""
+    from modules.career.cv_manager import CVManager, EntryType
+
+    manager = CVManager()
+    payload = {
+        "entry_type": EntryType(entry_type) if entry_type else None,
+        "title": title,
+        "organization": organization,
+        "description": description,
+        "start_date": start,
+        "end_date": end,
+        "tags": tags,
+        "highlights": list(highlights) if highlights else None,
+    }
+    try:
+        updated = manager.update(entry_id, **payload)
+    except ValueError as exc:
+        click.echo(f"Error: {exc}")
+        return
+
+    if updated:
+        click.echo(f"Updated CV entry #{entry_id}")
+    else:
+        click.echo(f"Error: CV entry #{entry_id} not found or archived")
+
+
+@cv.command("list")
+@click.option("--type", "entry_type", type=click.Choice(["experience", "education", "skill", "project", "certification"]))
+@click.option("--tag", "-t", default=None, help="Filter by tag")
+@click.option("--query", "-q", default=None, help="Search text")
+@click.option("--start-after", default=None, help="Filter entries ending after date")
+@click.option("--end-before", default=None, help="Filter entries starting before date")
+@click.option("--archived", "-a", is_flag=True, help="Include archived entries")
+def cv_list(entry_type, tag, query, start_after, end_before, archived):
+    """List CV entries"""
+    from modules.career.cv_manager import CVManager, EntryType
+
+    manager = CVManager()
+    entries = manager.list_entries(
+        entry_type=EntryType(entry_type) if entry_type else None,
+        tag=tag,
+        query=query,
+        start_after=start_after,
+        end_before=end_before,
+        include_archived=archived,
+        limit=200
+    )
+
+    if not entries:
+        click.echo("No CV entries found.")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Type':<13} {'Dates':<23} {'Title'}")
+    click.echo("-" * 75)
+
+    for entry in entries:
+        dates = "-"
+        if entry["start_date"] or entry["end_date"]:
+            dates = f"{entry['start_date'] or '??'} → {entry['end_date'] or 'present'}"
+        title = entry["title"][:40] + "..." if len(entry["title"]) > 40 else entry["title"]
+        click.echo(f"{entry['id']:<4} {entry['entry_type']:<13} {dates:<23} {title}")
+
+    click.echo(f"\nTotal: {len(entries)} entry(s)")
+
+
+@cv.command("show")
+@click.argument("entry_id", type=int)
+def cv_show(entry_id):
+    """Show CV entry details"""
+    from modules.career.cv_manager import CVManager
+
+    manager = CVManager()
+    entry = manager.get(entry_id)
+
+    if not entry:
+        click.echo(f"CV entry {entry_id} not found.")
+        return
+
+    click.echo(f"\nEntry #{entry['id']}")
+    click.echo("-" * 40)
+    click.echo(f"Type:        {entry['entry_type']}")
+    click.echo(f"Title:       {entry['title']}")
+    click.echo(f"Organization:{' ' if entry['organization'] else ' -'}{entry['organization'] or ''}")
+    click.echo(f"Dates:       {entry['start_date'] or '-'} → {entry['end_date'] or 'present'}")
+    click.echo(f"Tags:        {entry['tags'] or '-'}")
+    click.echo(f"Description: {entry['description'] or '-'}")
+    if entry["highlights"]:
+        click.echo("Highlights:")
+        for line in entry["highlights"].splitlines():
+            click.echo(f"  - {line}")
+    click.echo(f"Status:      {'ARCHIVED' if entry['archived'] else 'active'}")
+
+
+@cv.command("archive")
+@click.argument("entry_id", type=int)
+def cv_archive(entry_id):
+    """Archive a CV entry"""
+    from modules.career.cv_manager import CVManager
+
+    manager = CVManager()
+    if manager.archive(entry_id):
+        click.echo(f"Archived CV entry #{entry_id}")
+    else:
+        click.echo(f"Error: CV entry #{entry_id} not found or already archived")
+
+
+@cv.command("export")
+@click.option("--format", "-f", "export_format", type=click.Choice(["text", "markdown"]), default="text")
+@click.option("--output", "-o", type=click.Path(dir_okay=False, writable=True), default=None)
+@click.option("--type", "entry_type", type=click.Choice(["experience", "education", "skill", "project", "certification"]))
+@click.option("--tag", "-t", default=None, help="Filter by tag")
+@click.option("--query", "-q", default=None, help="Search text")
+@click.option("--start-after", default=None, help="Filter entries ending after date")
+@click.option("--end-before", default=None, help="Filter entries starting before date")
+@click.option("--archived", "-a", is_flag=True, help="Include archived entries")
+def cv_export(export_format, output, entry_type, tag, query, start_after, end_before, archived):
+    """Export CV entries"""
+    from modules.career.cv_manager import CVManager, EntryType
+    from modules.career.cv_renderer import render_markdown, render_text
+
+    manager = CVManager()
+    entries = manager.list_entries(
+        entry_type=EntryType(entry_type) if entry_type else None,
+        tag=tag,
+        query=query,
+        start_after=start_after,
+        end_before=end_before,
+        include_archived=archived,
+        limit=1000
+    )
+    content = render_markdown(entries) if export_format == "markdown" else render_text(entries)
+
+    if output:
+        Path(output).write_text(content, encoding="utf-8")
+        click.echo(f"Exported CV to {output}")
+        return
+
+    click.echo(content)
+
+
+@cv.command("explain")
+@click.argument("entry_id", type=int)
+def cv_explain(entry_id):
+    """Show CV entry event history (audit trail)"""
+    from modules.career.cv_manager import CVManager
+    import json
+
+    manager = CVManager()
+    events = manager.explain(entry_id)
+
+    if not events:
+        click.echo(f"No events found for CV entry {entry_id}.")
+        return
+
+    click.echo(f"\nEvent history for CV entry #{entry_id}:")
+    click.echo("-" * 60)
+
+    for event in events:
+        payload = event["payload"]
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        click.echo(f"\n[{event['timestamp']}] {event['event_type']}")
+        for k, v in payload.items():
+            if v:
+                click.echo(f"  {k}: {v}")
+
+
+# ============================================================================
 # VIDEO COMMANDS (CON-001)
 # ============================================================================
 
