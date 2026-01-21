@@ -14,8 +14,8 @@ click==8.1.7           # CLI framework
 pandas==2.2.0          # Data analysis
 numpy==1.26.3          # Numerical computing
 
-# API Integrations (Install as needed)
-# requests==2.31.0     # HTTP requests
+# API Integrations
+requests==2.31.0     # HTTP requests (required for repo analyzer)
 # google-api-python-client==2.111.0  # Google APIs
 # yfinance==0.2.35     # Yahoo Finance
 

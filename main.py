@@ -2166,6 +2166,267 @@ def reminder_explain(reminder_id):
 
 
 # ============================================================================
+# REPO ANALYZER COMMANDS (KNOW-005)
+# ============================================================================
+
+@cli.group()
+def repo():
+    """GitHub repository analysis (Onboarding)"""
+    pass
+
+
+@repo.command("analyze")
+@click.argument("github_url")
+@click.option("--notes", "-n", default="", help="Notes about why analyzing this repo")
+@click.option("--tags", "-t", default="", help="Comma-separated tags")
+def repo_analyze(github_url, notes, tags):
+    """Analyze a GitHub repository"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else []
+
+    click.echo(f"Analyzing repository: {github_url}")
+    click.echo("Fetching repository data...")
+
+    try:
+        analysis_id = analyzer.analyze(github_url, notes=notes, tags=tag_list)
+        analysis = analyzer.get(analysis_id)
+
+        click.echo(f"\nAnalysis #{analysis_id} complete!")
+        click.echo(f"Repository: {analysis['repo_name']}")
+        click.echo(f"Language: {analysis['language']}")
+        click.echo(f"Stars: {analysis['stars']:,}")
+
+        tech = analysis.get('technologies', {})
+        if tech.get('frameworks'):
+            click.echo(f"Frameworks: {', '.join(tech['frameworks'])}")
+
+        patterns = analysis.get('patterns', [])
+        if patterns:
+            click.echo(f"\nPatterns detected: {len(patterns)}")
+            for p in patterns[:3]:
+                click.echo(f"  - {p['name']}")
+
+    except Exception as e:
+        click.echo(f"Error analyzing repository: {e}")
+
+
+@repo.command("list")
+@click.option("--tag", "-t", default=None, help="Filter by tag")
+@click.option("--language", "-l", default=None, help="Filter by language")
+@click.option("--archived", "-a", is_flag=True, help="Include archived")
+def repo_list(tag, language, archived):
+    """List analyzed repositories"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    analyses = analyzer.list_analyses(tag=tag, language=language, include_archived=archived)
+
+    if not analyses:
+        click.echo("No repositories analyzed yet. Use: repo analyze <github_url>")
+        return
+
+    click.echo(f"\n{'ID':<4} {'Language':<12} {'Stars':<8} {'Repository'}")
+    click.echo("-" * 65)
+
+    for a in analyses:
+        lang = a['language'][:11] if a['language'] else "-"
+        stars = f"{a['stars']:,}" if a['stars'] else "-"
+        repo = a['repo_name'][:30] + "..." if len(a['repo_name']) > 30 else a['repo_name']
+        click.echo(f"{a['id']:<4} {lang:<12} {stars:<8} {repo}")
+
+    click.echo(f"\nTotal: {len(analyses)} analysis(es)")
+
+
+@repo.command("show")
+@click.argument("analysis_id", type=int)
+def repo_show(analysis_id):
+    """Show analysis details"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    a = analyzer.get(analysis_id)
+
+    if not a:
+        click.echo(f"Analysis {analysis_id} not found.")
+        return
+
+    click.echo(f"\nAnalysis #{a['id']}: {a['repo_name']}")
+    click.echo("-" * 50)
+    click.echo(f"URL: {a['github_url']}")
+    click.echo(f"Description: {a['description'] or '-'}")
+    click.echo(f"Language: {a['language']}")
+    click.echo(f"Stars: {a['stars']:,} | Forks: {a['forks']:,}")
+    click.echo(f"Topics: {', '.join(a['topics']) if a['topics'] else '-'}")
+    click.echo(f"Tags: {', '.join(a['tags']) if a['tags'] else '-'}")
+    click.echo(f"Analyzed: {a['analyzed_at'][:19] if a['analyzed_at'] else '-'}")
+
+    tech = a.get('technologies', {})
+    if tech:
+        click.echo("\nTechnologies:")
+        if tech.get('languages'):
+            click.echo(f"  Languages: {', '.join(tech['languages'])}")
+        if tech.get('frameworks'):
+            click.echo(f"  Frameworks: {', '.join(tech['frameworks'])}")
+        if tech.get('tools'):
+            click.echo(f"  Tools: {', '.join(tech['tools'])}")
+
+    struct = a.get('structure', {})
+    if struct:
+        click.echo(f"\nStructure: {struct.get('total_files', 0)} files")
+        if struct.get('top_level_dirs'):
+            click.echo(f"  Directories: {', '.join(struct['top_level_dirs'][:8])}")
+
+    patterns = a.get('patterns', [])
+    if patterns:
+        click.echo("\nPatterns:")
+        for p in patterns:
+            click.echo(f"  - {p['name']} ({p['confidence']})")
+
+    if a.get('lessons'):
+        click.echo(f"\nLessons Learned: {len(a['lessons'])}")
+        for lesson in a['lessons'][:3]:
+            click.echo(f"  - {lesson['title']}")
+
+
+@repo.command("report")
+@click.argument("analysis_id", type=int)
+@click.option("--output", "-o", type=click.Path(dir_okay=False, writable=True), default=None)
+def repo_report(analysis_id, output):
+    """Generate markdown report for an analysis"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    report = analyzer.generate_report(analysis_id)
+
+    if not report:
+        click.echo(f"Analysis {analysis_id} not found.")
+        return
+
+    if output:
+        Path(output).write_text(report, encoding="utf-8")
+        click.echo(f"Report saved to {output}")
+    else:
+        click.echo(report)
+
+
+@repo.command("lesson")
+@click.argument("analysis_id", type=int)
+@click.argument("title")
+@click.option("--description", "-d", default="", help="Lesson description")
+@click.option("--apply-to", "-a", default="", help="Where to apply this lesson")
+def repo_lesson(analysis_id, title, description, apply_to):
+    """Add a lesson learned from a repository"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    if analyzer.add_lesson(analysis_id, title, description, apply_to):
+        click.echo(f"Added lesson to analysis #{analysis_id}: {title}")
+    else:
+        click.echo(f"Error: Analysis #{analysis_id} not found")
+
+
+@repo.command("pattern")
+@click.argument("analysis_id", type=int)
+@click.argument("pattern_name")
+@click.option("--description", "-d", default="", help="Pattern description")
+@click.option("--applicability", "-a", default="", help="When to apply this pattern")
+def repo_pattern(analysis_id, pattern_name, description, applicability):
+    """Add a manually identified pattern"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    if analyzer.add_pattern(analysis_id, pattern_name, description, applicability):
+        click.echo(f"Added pattern to analysis #{analysis_id}: {pattern_name}")
+    else:
+        click.echo(f"Error: Analysis #{analysis_id} not found")
+
+
+@repo.command("patterns")
+def repo_patterns():
+    """List all patterns across all analyzed repos"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    patterns = analyzer.get_all_patterns()
+
+    if not patterns:
+        click.echo("No patterns found. Analyze some repositories first.")
+        return
+
+    click.echo(f"\nAll Identified Patterns ({len(patterns)} total):")
+    click.echo("-" * 50)
+
+    for p in patterns:
+        source = p.get('source_repo', '').split('/')[-1] if p.get('source_repo') else '-'
+        click.echo(f"  - {p.get('name', p.get('pattern_name', '-'))} (from {source})")
+
+
+@repo.command("lessons")
+def repo_lessons():
+    """List all lessons learned across all repos"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    lessons = analyzer.get_all_lessons()
+
+    if not lessons:
+        click.echo("No lessons recorded. Add some with: repo lesson <id> <title>")
+        return
+
+    click.echo(f"\nAll Lessons Learned ({len(lessons)} total):")
+    click.echo("-" * 50)
+
+    for lesson in lessons:
+        source = lesson.get('source_repo', '').split('/')[-1] if lesson.get('source_repo') else '-'
+        click.echo(f"  - {lesson['title']} (from {source})")
+        if lesson.get('apply_to'):
+            click.echo(f"    Apply to: {lesson['apply_to']}")
+
+
+@repo.command("archive")
+@click.argument("analysis_id", type=int)
+def repo_archive(analysis_id):
+    """Archive an analysis"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+
+    analyzer = RepoAnalyzer()
+    if analyzer.archive(analysis_id):
+        click.echo(f"Archived analysis #{analysis_id}")
+    else:
+        click.echo(f"Error: Analysis #{analysis_id} not found")
+
+
+@repo.command("explain")
+@click.argument("analysis_id", type=int)
+def repo_explain(analysis_id):
+    """Show event history for an analysis"""
+    from modules.knowledge.repo_analyzer import RepoAnalyzer
+    import json
+
+    analyzer = RepoAnalyzer()
+    events = analyzer.explain(analysis_id)
+
+    if not events:
+        click.echo(f"No events found for analysis {analysis_id}.")
+        return
+
+    click.echo(f"\nEvent history for analysis #{analysis_id}:")
+    click.echo("-" * 60)
+
+    for event in events:
+        payload = event['payload']
+        if isinstance(payload, str):
+            payload = json.loads(payload)
+        click.echo(f"\n[{event['timestamp']}] {event['event_type']}")
+        # Show selected fields only (not full payload)
+        for k in ['repo_name', 'pattern_name', 'title', 'status']:
+            if k in payload:
+                click.echo(f"  {k}: {payload[k]}")
+
+
+# ============================================================================
 # UI COMMANDS
 # ============================================================================
 
