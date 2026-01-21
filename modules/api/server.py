@@ -5,8 +5,13 @@ REST API for the web interface with endpoints for all modules.
 Enhanced with GTD views, OKR support, and weekly reviews.
 
 Run with: uvicorn modules.api.server:app --reload
+
+Environment variables:
+  ATLAS_CORS_ORIGINS: Comma-separated list of allowed origins
+  ATLAS_ENV: "development" or "production"
 """
 
+import os
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -46,9 +51,29 @@ app = FastAPI(
     version="2.1.0"
 )
 
+# CORS Configuration
+# Set ATLAS_CORS_ORIGINS env var for production (comma-separated)
+# Example: ATLAS_CORS_ORIGINS=https://atlas.example.com,https://app.example.com
+def get_cors_origins() -> list:
+    """Get CORS origins from environment or use defaults."""
+    env_origins = os.getenv("ATLAS_CORS_ORIGINS", "")
+    if env_origins:
+        return [origin.strip() for origin in env_origins.split(",") if origin.strip()]
+
+    # Default development origins
+    return [
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
